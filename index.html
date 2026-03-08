@@ -902,6 +902,7 @@
   <div class="ap-section" style="border-bottom:none">
     <div class="ap-body" style="display:block;padding-top:16px">
       <button class="btn-save outline" onclick="saveAll()"><i class="fas fa-save"></i>שמור הכל (localStorage)</button>
+      <button class="btn-save" style="margin-top:8px;background:#e07b3a" onclick="fixWorkshops()"><i class="fas fa-sync"></i>תקן סדנאות ריקות</button>
       <button class="btn-save danger" style="margin-top:8px" onclick="resetAll()"><i class="fas fa-trash"></i>איפוס לברירת מחדל</button>
     </div>
   </div>
@@ -1189,6 +1190,11 @@ function renderWorkshops() {
     const col = document.createElement('div');
     col.className = 'col-lg-4 col-md-6 fade-up';
     col.style.animationDelay = (i * .08) + 's';
+    const tagsHtml = ws.tags.map((t, ti) => `
+      <span class="workshop-tag" contenteditable="${adminMode}" data-f="ws-tag-${i}-${ti}"
+        style="${adminMode ? 'outline:1px dashed var(--rose);border-radius:4px;min-width:20px;' : ''}">${t}</span>
+      ${adminMode ? `<button onclick="delTag(${i},${ti})" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:11px;padding:0 2px;line-height:1" title="מחק תגית">✕</button>` : ''}
+    `).join('');
     col.innerHTML = `
       <div class="workshop-card" style="position:relative">
         <button class="del-btn" onclick="delWs(${i})">✕</button>
@@ -1196,14 +1202,18 @@ function renderWorkshops() {
         <h4 class="editable" contenteditable="${adminMode}" data-f="ws-t-${i}">${ws.title}</h4>
         <p class="editable" contenteditable="${adminMode}" data-f="ws-d-${i}">${ws.desc}</p>
         <span class="workshop-price editable" contenteditable="${adminMode}" data-f="ws-p-${i}">${ws.price}</span>
-        <div class="mt-2">${ws.tags.map(t=>`<span class="workshop-tag">${t}</span>`).join('')}</div>
+        <div class="mt-2 tags-wrap" data-ws="${i}">${tagsHtml}${adminMode ? `<button onclick="addTag(${i})" style="background:var(--light-pink);border:1px dashed var(--rose);border-radius:12px;font-size:11px;padding:2px 8px;cursor:pointer;color:var(--brown);font-family:'Heebo',sans-serif">+ תגית</button>` : ''}</div>
       </div>`;
     c.appendChild(col);
     col.querySelectorAll('[data-f]').forEach(el => el.addEventListener('input', () => {
       const f = el.dataset.f;
-      if (f.startsWith('ws-t-')) workshops[i].title = el.textContent;
+      if (f.startsWith('ws-t-')) { workshops[i].title = el.textContent; renderFooterWs(); }
       if (f.startsWith('ws-d-')) workshops[i].desc  = el.textContent;
       if (f.startsWith('ws-p-')) workshops[i].price = el.textContent;
+      if (f.startsWith('ws-tag-')) {
+        const ti = parseInt(f.split('-')[3]);
+        workshops[i].tags[ti] = el.textContent;
+      }
     }));
   });
   const ac = document.getElementById('addWsCol');
@@ -1451,6 +1461,18 @@ function addWorkshop() {
 }
 function delWs(i) { if (!confirm('למחוק?')) return; workshops.splice(i,1); renderWorkshops(); renderFooterWs(); }
 
+function addTag(i) {
+  const tag = prompt('שם התגית החדשה:');
+  if (!tag || !tag.trim()) return;
+  workshops[i].tags.push(tag.trim());
+  renderWorkshops(); renderFooterWs();
+}
+
+function delTag(i, ti) {
+  workshops[i].tags.splice(ti, 1);
+  renderWorkshops(); renderFooterWs();
+}
+
 function addTestimonial() {
   const name = document.getElementById('new-rev-name').value.trim();
   const text = document.getElementById('new-rev-text').value.trim();
@@ -1502,6 +1524,15 @@ function saveAll() {
   const area = document.getElementById('t-area');
   if (area) localStorage.setItem('sab-txt-area', area.value);
   showToast('✓ הכל נשמר!');
+}
+
+function fixWorkshops() {
+  localStorage.removeItem('sab-ws');
+  localStorage.removeItem('sab-rv');
+  workshops    = JSON.parse(JSON.stringify(DW));
+  testimonials = JSON.parse(JSON.stringify(DR));
+  renderWorkshops(); renderFooterWs(); renderTestimonials();
+  showToast('✓ סדנאות וחוות דעת שוחזרו!');
 }
 
 function resetAll() {
