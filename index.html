@@ -846,7 +846,7 @@
           <div>
             <h4 id="con-card-title" style="color:var(--brown);margin-bottom:20px">פרטי התקשרות</h4>
             <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon1" class="fas fa-phone"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl1">טלפון / וואטסאפ</div><a href="#" id="phoneDisplay">054-4544483</a></div></div>
-            <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon2" class="fas fa-envelope"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl2">אימייל</div><a href="#" id="emailDisplay">ninakeren527@gmail.com</a></div></div>
+            <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon2" class="fas fa-envelope"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl2">אימייל</div><a href="#" id="emailDisplay"><span class="__cf_email__" data-cfemail="d8b6b1b6b9b3bdaabdb6edeaef98bfb5b9b1b4f6bbb7b5">[email&#160;protected]</span></a></div></div>
             <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon3" class="fas fa-map-marker-alt"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl3">אזור פעילות</div><span id="area1">צפון הארץ ומרכז</span></div></div>
           </div>
           <div class="mt-4">
@@ -897,7 +897,7 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 /* ═══════════════════════════════════════
    DATA
@@ -1234,15 +1234,24 @@ function saveAll() {
   // texts
   const TM = {
     't-h1':'ht1','t-h2':'ht2','t-hsub':'hsub','t-btn1':'hbtn1','t-btn2':'hbtn2',
-    't-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
-    't-wstit':'wstit','t-wssub':'wssub',
-    't-gtit':'gtit','t-gsub':'gsub',
-    't-ctit':'ctit','t-csub':'csub',
-    't-fdesc':'fdesc','t-copy':'fcopy'
+    't-badge':'hero-badge-txt','t-float-title':'hero-float-title','t-float-sub':'hero-float-sub',
+    't-float-emoji':'hero-float-emoji',
+    't-hstat1n':'hstat1n','t-hstat1l':'hstat1l','t-hstat2n':'hstat2n','t-hstat2l':'hstat2l',
+    't-hstat3n':'hstat3n','t-hstat3l':'hstat3l',
+    't-about-label':'about-label','t-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
+    't-astat1n':'astat1n','t-astat1l':'astat1l','t-astat2n':'astat2n','t-astat2l':'astat2l',
+    't-astat3n':'astat3n','t-astat3l':'astat3l',
+    't-ws-label':'ws-label','t-wstit':'wstit','t-wssub':'wssub','t-ws-cta':'ws-cta-txt',
+    't-gal-label':'gal-label','t-gtit':'gtit','t-gsub':'gsub',
+    't-rev-label':'rev-label','t-rev-title':'rev-title',
+    't-con-label':'con-label','t-ctit':'ctit','t-csub':'csub',
+    't-card-title':'con-card-title','t-ci-lbl1':'ci-lbl1','t-ci-lbl2':'ci-lbl2','t-ci-lbl3':'ci-lbl3',
+    't-wa-btn':'wa-btn-txt',
+    't-fdesc':'fdesc','t-fn1':'footer-nav-title','t-fn2':'footer-ws-title','t-fn3':'footer-con-title','t-copy':'fcopy'
   };
   Object.entries(TM).forEach(([inp, tgt]) => {
     const el = document.getElementById(inp);
-    if (el) localStorage.setItem('sab-txt-' + tgt, el.tagName === 'TEXTAREA' ? el.value : el.value);
+    if (el) localStorage.setItem('sab-txt-' + tgt, el.value);
   });
   const area = document.getElementById('t-area');
   if (area) localStorage.setItem('sab-txt-area', area.value);
@@ -1600,12 +1609,4 @@ document.addEventListener('DOMContentLoaded', () => {
       if (h === '#') return;
       e.preventDefault();
       const t = document.querySelector(h);
-      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const m = document.getElementById('mobileMenu');
-      if (m) m.style.display = 'none';
-    });
-  });
-});
-</script>
-</body>
-</html>
+    
