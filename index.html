@@ -1964,7 +1964,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // smooth scroll
-
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const h = a.getAttribute('href');
+      if (h === '#') return;
+      e.preventDefault();
+      const t = document.querySelector(h);
       if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
       const m = document.getElementById('mobileMenu');
       if (m) m.style.display = 'none';
