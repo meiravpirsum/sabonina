@@ -1063,7 +1063,7 @@
           <div class="row g-3">
             <div class="col-md-6"><label class="form-label-custom">שם מלא *</label><input type="text" class="form-control-custom" placeholder="שמך המלא"/></div>
             <div class="col-md-6"><label class="form-label-custom">טלפון *</label><input type="tel" class="form-control-custom" placeholder="05X-XXXXXXX"/></div>
-            <div class="col-12"><label class="form-label-custom">אימייל</label><input type="email" class="form-control-custom" placeholder="example@gmail.com"/></div>
+            <div class="col-12"><label class="form-label-custom">אימייל</label><input type="email" class="form-control-custom" placeholder="דוא&quot;ל"/></div>
             <div class="col-md-6">
               <label class="form-label-custom">סוג האירוע</label>
               <select class="form-control-custom"><option>בחרו...</option><option>יום הולדת</option><option>גיבוש עובדים</option><option>בר/בת מצווה</option><option>חינה / מסיבת רווקות</option><option>כיתת אמהות</option><option>מארז מתנה</option><option>אחר</option></select>
@@ -1131,7 +1131,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script data-cfasync="false">
 /* ═══════════════════════════════════════
    DATA
 ═══════════════════════════════════════ */
@@ -1172,6 +1172,9 @@ const BF = [
 
 const _ws = JSON.parse(localStorage.getItem('sab-ws') || 'null');
 const _rv = JSON.parse(localStorage.getItem('sab-rv') || 'null');
+// אם שמורים מערכים ריקים מבאג ישן – מחק אותם
+if (_ws !== null && _ws.length === 0) localStorage.removeItem('sab-ws');
+if (_rv !== null && _rv.length === 0) localStorage.removeItem('sab-rv');
 let workshops    = (_ws && _ws.length > 0) ? _ws : JSON.parse(JSON.stringify(DW));
 let testimonials = (_rv && _rv.length > 0) ? _rv : JSON.parse(JSON.stringify(DR));
 let adminMode    = false;
@@ -1946,6 +1949,7 @@ document.addEventListener('keydown', e => {
    INIT
 ═══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ sabonina JS loaded OK');
   document.querySelectorAll('.editable').forEach(el => el.contentEditable = 'false');
   buildThemeDots();
   buildFonts();
