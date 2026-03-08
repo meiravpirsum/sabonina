@@ -1957,7 +1957,15 @@ document.addEventListener('keydown', e => {
    INIT
 ═══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  try {
   console.log('✅ sabonina JS loaded OK');
+  // Debug indicator - remove after confirming JS works
+  const _dbg = document.createElement('div');
+  _dbg.id = 'jsDebug';
+  _dbg.style.cssText = 'position:fixed;bottom:80px;left:16px;background:#1a56a0;color:#fff;padding:8px 14px;border-radius:8px;font-family:Heebo,sans-serif;font-size:12px;z-index:99999;transition:opacity 1s';
+  _dbg.textContent = '✅ JavaScript פועל תקין';
+  document.body.appendChild(_dbg);
+  setTimeout(() => { _dbg.style.opacity='0'; setTimeout(()=>_dbg.remove(),1000); }, 3000);
   document.querySelectorAll('.editable').forEach(el => el.contentEditable = 'false');
   buildThemeDots();
   buildFonts();
@@ -1997,6 +2005,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (m) m.style.display = 'none';
     });
   });
+  } catch(err) {
+    console.error('❌ SABONINA JS ERROR:', err);
+    // Show visible error for debugging
+    const dbg = document.createElement('div');
+    dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:12px;z-index:99999;font-family:monospace;font-size:13px;direction:ltr';
+    dbg.textContent = '❌ JS Error: ' + err.message + ' at ' + (err.filename||'') + ':' + (err.lineno||'');
+    document.body.appendChild(dbg);
+  }
 });
 </script>
 </body>
