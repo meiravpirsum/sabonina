@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>סבונינה – סדנאות סבונים בעבודת יד</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Heebo:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@400;700&family=Secular+One&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root {
+      --cream:      #fdf6ef;
+      --blush:      #f2c4b5;
+      --rose:       #d4836a;
+      --terracotta: #b05a3b;
+      --brown:      #6b3a2a;
+      --sage:       #8aab8b;
+      --dark:       #2e1a12;
+      --light-pink: #fce8df;
+      --gold:       #c9965a;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: var(--cream); color: var(--dark); direction: rtl; }
+    h1,h2,h3,h4 { font-family: 'Playfair Display', serif; }
+
+    /* ── ADMIN TOGGLE ── */
+    #adminToggle {
+      position: fixed; bottom: 24px; left: 24px; z-index: 9999;
+      background: var(--brown); color: #fff; border: none; border-radius: 50px;
+      padding: 10px 20px; font-family: 'Heebo', sans-serif; font-size: 13px;
+      cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,.25); transition: all .3s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #adminToggle:hover { background: var(--terracotta); transform: translateY(-2px); }
+    #adminToggle.active { background: var(--sage); }
+
+    /* ── ADMIN PANEL ── */
+    #adminPanel {
+      display: none; position: fixed; top: 0; right: 0; height: 100vh; width: 340px;
+      background: #fff; z-index: 9998; box-shadow: -4px 0 30px rgba(0,0,0,.15);
+      overflow-y: auto; padding: 0; border-left: 4px solid var(--rose);
+    }
+    #adminPanel.show { display: block; }
+
+    .ap-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 20px; background: var(--dark); color: #fff; position: sticky; top: 0; z-index: 10;
+    }
+    .ap-header h5 { margin: 0; font-family: 'Heebo', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+    .ap-close { background: none; border: none; color: rgba(255,255,255,.6); font-size: 20px; cursor: pointer; line-height: 1; padding: 0; }
+    .ap-close:hover { color: #fff; }
+
+    /* accordion sections */
+    .ap-section { border-bottom: 1px solid #f0ebe8; }
+    .ap-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; cursor: pointer; user-select: none;
+      font-family: 'Heebo', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--brown); transition: background .2s;
+    }
+    .ap-section-header:hover { background: var(--light-pink); }
+    .ap-section-header .arrow { font-size: 10px; transition: transform .25s; color: var(--rose); }
+    .ap-section-header.open .arrow { transform: rotate(180deg); }
+    .ap-body { display: none; padding: 4px 20px 18px; background: #fafafa; }
+    .ap-body.open { display: block; }
+
+    /* fields */
+    .af { margin-bottom: 11px; }
+    .af label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .3px; display: block; margin-bottom: 4px; }
+    .af input[type=text], .af input[type=url], .af input[type=email], .af input[type=tel],
+    .af textarea, .af select {
+      width: 100%; border: 1.5px solid #e8ddd8; border-radius: 8px; padding: 8px 10px;
+      font-family: 'Heebo', sans-serif; font-size: 13px; resize: vertical; transition: border .2s;
+      background: #fff;
+    }
+    .af input:focus, .af textarea:focus, .af select:focus {
+      outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(212,131,106,.12);
+    }
+    .af input[type=color] {
+      width: 100%; height: 34px; border: 1.5px solid #e0d0ca; border-radius: 8px;
+      cursor: pointer; padding: 2px 3px; background: #fff;
+    }
+    .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* theme dots */
+    .theme-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .theme-dot {
+      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: all .2s; flex-shrink: 0; position: relative;
+    }
+    .theme-dot:hover, .theme-dot.active { border-color: var(--dark); transform: scale(1.12); }
+    .theme-dot title { display: none; }
+
+    /* font buttons */
+    .font-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+    .font-btn {
+      padding: 5px 11px; border: 1.5px solid #e0d0ca; border-radius: 8px;
+      cursor: pointer; font-size: 12px; transition: all .2s; background: #fff;
+      font-family: inherit;
+    }
+    .font-btn:hover { border-color: var(--rose); }
+    .font-btn.active { border-color: var(--rose); background: var(--light-pink); color: var(--brown); font-weight: 700; }
+
+    /* buttons */
+    .btn-save {
+      background: var(--rose); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 16px; font-family: 'Heebo', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; width: 100%; margin-top: 8px; transition: background .2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-save:hover { background: var(--terracotta); }
+    .btn-save.outline { background: transparent; color: var(--terracotta); border: 1.5px solid var(--rose); }
+    .btn-save.outline:hover { background: var(--light-pink); }
+    .btn-save.danger { background: #e05555; }
+    .btn-save.danger:hover { background: #c03030; }
+
+    /* ── EDIT HINT ── */
+    .admin-overlay-hint {
+      display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      background: var(--brown); color: #fff; padding: 8px 22px; border-radius: 50px;
+      font-size: 13px; font-weight: 600; z-index: 9997;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2); font-family: 'Heebo', sans-serif;
+    }
+    body.admin-mode .admin-overlay-hint { display: block; }
+    body.admin-mode .editable {
+      border-bottom: 2px dashed var(--rose) !important; cursor: text;
+      background: rgba(242,196,181,.08); border-radius: 4px; padding: 2px 4px;
+    }
+    body.admin-mode .editable:hover { background: rgba(242,196,181,.2); }
+
+    body.admin-mode .del-btn { display: flex !important; }
+    .del-btn {
+      display: none !important; position: absolute; top: 10px; left: 10px;
+      width: 26px; height: 26px; background: rgba(220,60,60,.85); border: none;
+      border-radius: 50%; color: #fff; font-size: 11px; align-items: center;
+      justify-content: center; cursor: pointer; z-index: 10;
+    }
+    body.admin-mode .add-card-btn { display: flex !important; }
+    .add-card-btn {
+      display: none !important; border: 2px dashed rgba(255,255,255,.3); border-radius: 20px;
+      background: transparent; color: rgba(255,255,255,.6); padding: 40px 20px;
+      font-family: 'Heebo', sans-serif; font-size: 15px; cursor: pointer; width: 100%;
+      min-height: 250px; align-items: center; justify-content: center; flex-direction: column;
+      gap: 10px; transition: all .3s;
+    }
+    .add-card-btn:hover { border-color: var(--rose); color: var(--rose); background: rgba(212,131,106,.1); }
+
+    /* ── TOAST ── */
+    .toast-save {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+      background: var(--sage); color: #fff; padding: 10px 24px; border-radius: 50px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      z-index: 9999; opacity: 0; transition: all .4s; font-family: 'Heebo', sans-serif;
+    }
+    .toast-save.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── NAVBAR ── */
+    .navbar-sabonina {
+      background: rgba(253,246,239,.97); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(210,140,110,.15); padding: 12px 0;
+      position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 20px rgba(176,90,59,.08);
+    }
+    .brand-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--brown); font-weight: 700; letter-spacing: 1px; }
+    .nav-link-custom { font-family: 'Heebo', sans-serif; font-weight: 500; color: var(--dark) !important; font-size: 15px; padding: 6px 16px !important; border-radius: 50px; transition: all .25s; text-decoration: none; }
+    .nav-link-custom:hover { background: var(--light-pink); color: var(--brown) !important; }
+    .nav-cta { background: var(--rose); color: #fff !important; padding: 8px 22px !important; }
+    .nav-cta:hover { background: var(--terracotta) !important; color: #fff !important; }
+
+    /* ── HERO ── */
+    .hero-section {
+      background: linear-gradient(135deg, #fce8df 0%, #f5d9cc 40%, #fdf6ef 100%);
+      min-height: 88vh; position: relative; overflow: hidden; display: flex; align-items: center;
+    }
+    .hero-section::before { content: ''; position: absolute; top: -60px; left: -60px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(242,196,181,.5) 0%, transparent 70%); border-radius: 50%; }
+    .hero-section::after  { content: ''; position: absolute; bottom: -80px; right: -80px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(138,171,139,.25) 0%, transparent 70%); border-radius: 50%; }
+    .hero-badge { display: inline-block; background: var(--light-pink); color: var(--terracotta); font-size: 13px; font-weight: 600; padding: 6px 18px; border-radius: 50px; border: 1px solid var(--blush); margin-bottom: 18px; animation: fadeDown .8s ease both; }
+    .hero-title { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.2; color: var(--brown); font-weight: 700; animation: fadeDown .9s ease .1s both; }
+    .hero-subtitle { font-size: 1.1rem; color: #7a5545; line-height: 1.7; margin: 20px 0 32px; animation: fadeDown .9s ease .2s both; }
+    .hero-btns { animation: fadeDown .9s ease .3s both; }
+    .hero-image-wrap { animation: fadeLeft 1s ease .2s both; }
+    .btn-primary-custom { background: var(--rose); color: #fff; border: none; border-radius: 50px; padding: 14px 32px; font-family: 'Heebo', sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; transition: all .3s; display: inline-block; cursor: pointer; }
+    .btn-primary-custom:hover { background: var(--terracotta); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(176,90,59,.35); }
+    .btn-outline-custom { background: transparent; color: var(--brown); border: 2px solid var(--blush); border-radius: 50px; padding: 12px 28px; font-family: 'Heebo', sans-serif; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .3s; display: inline-block; }
+    .btn-outline-custom:hover { border-color: var(--rose); background: var(--light-pink); color: var(--brown); }
+    .hero-img { width: 100%; max-width: 480px; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; object-fit: cover; aspect-ratio: 1; box-shadow: 0 20px 60px rgba(176,90,59,.25); }
+    .hero-float-badge { position: absolute; bottom: 30px; right: -10px; background: #fff; border-radius: 16px; padding: 12px 18px; box-shadow: 0 8px 30px rgba(0,0,0,.12); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+
+    /* ── SECTION ── */
+    .section-label { font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
+    .section-title  { font-size: clamp(1.8rem, 3.5vw, 2.8rem); color: var(--brown); font-weight: 700; line-height: 1.25; }
+    .section-divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--rose), var(--blush)); border-radius: 3px; margin: 14px auto 20px; }
+    .section-divider.rtl { margin: 14px 0 20px; }
+
+    /* ── ABOUT ── */
+    .about-section { padding: 90px 0; }
+    .about-img { width: 100%; border-radius: 24px; object-fit: cover; max-height: 440px; box-shadow: 0 16px 50px rgba(176,90,59,.2); }
+    .about-text { font-size: 1.05rem; line-height: 1.8; color: #5a3525; }
+    .about-stat { background: var(--light-pink); border-radius: 16px; padding: 20px; text-align: center; }
+    .about-stat .num { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--rose); display: block; }
+    .about-stat .lbl { font-size: 13px; color: var(--brown); font-weight: 500; }
+
+    /* ── WORKSHOPS ── */
+    .workshops-section { background: linear-gradient(135deg, var(--brown) 0%, #8b4a30 100%); padding: 90px 0; position: relative; overflow: hidden; }
+    .workshops-section::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255,255,255,.04); border-radius: 50%; }
+    .workshop-card { background: rgba(255,255,255,.07); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.15); border-radius: 20px; padding: 30px; color: #fff; height: 100%; transition: all .3s; position: relative; overflow: hidden; }
+    .workshop-card:hover { transform: translateY(-6px); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); }
+    .workshop-icon { width: 56px; height: 56px; background: var(--rose); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; }
+    .workshop-card h4 { font-size: 1.3rem; margin-bottom: 10px; }
+    .workshop-card p { font-size: .93rem; opacity: .85; line-height: 1.7; }
+    .workshop-price { display: inline-block; background: var(--gold); color: #fff; font-weight: 700; padding: 4px 14px; border-radius: 50px; font-size: 13px; margin-top: 12px; }
+    .workshop-tag { display: inline-block; border: 1px solid rgba(255,255,255,.3); color: rgba(255,255,255,.8); font-size: 11px; padding: 2px 10px; border-radius: 50px; margin-top: 6px; margin-left: 4px; }
+
+    /* ── GALLERY ── */
+    .gallery-section { padding: 90px 0; background: var(--cream); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .gallery-item { border-radius: 16px; overflow: hidden; aspect-ratio: 1; position: relative; cursor: pointer; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .gallery-item:hover img { transform: scale(1.06); }
+    .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(176,90,59,.7) 0%, transparent 70%); opacity: 0; transition: opacity .3s; display: flex; align-items: flex-end; padding: 16px; }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay span { color: #fff; font-size: 14px; font-weight: 600; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-section { background: var(--light-pink); padding: 80px 0; }
+    .testimonial-card { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(176,90,59,.08); height: 100%; position: relative; }
+    .testimonial-card::before { content: '"'; font-family: 'Playfair Display', serif; font-size: 80px; color: var(--blush); position: absolute; top: 5px; right: 20px; line-height: 1; }
+    .testimonial-text { font-size: 1rem; line-height: 1.7; color: #5a3525; padding-top: 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+    .author-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--blush); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--brown); flex-shrink: 0; }
+    .author-name  { font-weight: 600; font-size: 14px; color: var(--brown); }
+    .author-event { font-size: 12px; color: #9a7060; }
+    .stars { color: var(--gold); font-size: 14px; }
+
+    /* ── CONTACT ── */
+    .contact-section { padding: 90px 0; }
+    .contact-card { background: #fff; border-radius: 24px; padding: 40px; box-shadow: 0 8px 40px rgba(176,90,59,.1); }
+    .form-control-custom { border: 1.5px solid #e8d5cb; border-radius: 12px; padding: 12px 16px; font-family: 'Heebo', sans-serif; font-size: 14px; background: var(--cream); width: 100%; transition: all .2s; }
+    .form-control-custom:focus { outline: none; border-color: var(--rose); background: #fff; box-shadow: 0 0 0 4px rgba(212,131,106,.1); }
+    .form-label-custom { font-size: 13px; font-weight: 600; color: var(--brown); margin-bottom: 6px; display: block; }
+    .contact-info-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--light-pink); }
+    .contact-info-item:last-child { border-bottom: none; }
+    .ci-icon { width: 44px; height: 44px; background: var(--light-pink); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--rose); font-size: 18px; flex-shrink: 0; }
+    .ci-text a { color: var(--brown); text-decoration: none; font-weight: 500; }
+    .ci-text a:hover { color: var(--rose); }
+    .ci-label { font-size: 12px; color: #9a7060; }
+
+    /* ── FOOTER ── */
+    .footer-main { background: var(--dark); color: rgba(255,255,255,.75); padding: 50px 0 24px; }
+    .footer-logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff; font-weight: 700; }
+    .footer-social a { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,.1); border-radius: 10px; color: #fff; font-size: 16px; margin-left: 8px; text-decoration: none; transition: all .25s; }
+    .footer-social a:hover { background: var(--rose); transform: translateY(-2px); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.08); margin-top: 36px; padding-top: 20px; font-size: 13px; opacity: .5; }
+    .footer-link { display: block; color: rgba(255,255,255,.65); text-decoration: none; font-size: 14px; padding: 4px 0; transition: color .2s; }
+    .footer-link:hover { color: var(--blush); }
+
+    /* ── FAB ── */
+    .whatsapp-fab { position: fixed; bottom: 24px; right: 24px; width: 58px; height: 58px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; text-decoration: none; box-shadow: 0 4px 20px rgba(37,211,102,.4); z-index: 999; transition: transform .3s; }
+    .whatsapp-fab:hover { transform: scale(1.1); color: #fff; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-20px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes fadeLeft { from { opacity:0; transform:translateX(40px)  } to { opacity:1; transform:translateX(0) } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(30px)  } to { opacity:1; transform:translateY(0) } }
+    .fade-up { opacity:0; animation: fadeUp .8s ease forwards; }
+
+    @media (max-width:768px) {
+      .hero-section { min-height:auto; padding:60px 0; }
+      .gallery-grid { grid-template-columns:repeat(2,1fr); }
+      #adminPanel { width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toast-save" id="toastSave">✓ נשמר!</div>
+<div class="admin-overlay-hint"><i class="fas fa-pen me-2"></i>מצב עריכה – לחץ על כל טקסט לעריכה</div>
+<a href="https://wa.me/972544544483" class="whatsapp-fab" id="waFab" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
+<button id="adminToggle" onclick="toggleAdmin()">
+  <i class="fas fa-cog" id="adminIcon"></i>
+  <span id="adminLabel">ניהול תוכן</span>
+</button>
+
+<!-- ═══════════════════════ ADMIN PANEL ═══════════════════════ -->
+<div id="adminPanel">
+
+  <div class="ap-header">
+    <h5><i class="fas fa-sliders-h me-2"></i>מערכת ניהול תוכן</h5>
+    <button class="ap-close" onclick="toggleAdmin()">×</button>
+  </div>
+
+  <!-- ① לוגו וזהות -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-star me-2" style="color:var(--rose)"></i>לוגו וזהות</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>אמוג'י / סמל</label><input type="text" id="b-emoji" value="🧼" maxlength="4" oninput="liveLogoUpdate()"/></div>
+      <div class="af"><label>שם המותג</label><input type="text" id="b-name" value="סבונינה" oninput="liveLogoUpdate()"/></div>
+      <div class="af"><label>כותרת דפדפן</label><input type="text" id="b-title" value="סדנאות סבונים בעבודת יד" oninput="document.title=this.value"/></div>
+      <button class="btn-save" onclick="saveLogo()"><i class="fas fa-check"></i>שמור לוגו</button>
+    </div>
+  </div>
+
+  <!-- ② צבעוניות -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-palette me-2" style="color:var(--rose)"></i>צבעוניות</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">ערכות מוכנות</div>
+      <div class="theme-row" id="themePresets"></div>
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:12px 0 8px">צבעים מותאמים אישית</div>
+      <div class="color-grid">
+        <div class="af"><label>צבע ראשי</label><input type="color" id="c-rose"  value="#d4836a" oninput="applyColors()"/></div>
+        <div class="af"><label>צבע כהה</label><input type="color" id="c-brown" value="#6b3a2a" oninput="applyColors()"/></div>
+        <div class="af"><label>צבע רקע</label><input type="color" id="c-cream" value="#fdf6ef" oninput="applyColors()"/></div>
+        <div class="af"><label>ורוד בהיר</label><input type="color" id="c-blush" value="#f2c4b5" oninput="applyColors()"/></div>
+        <div class="af"><label>כתום</label><input type="color" id="c-terra" value="#b05a3b" oninput="applyColors()"/></div>
+        <div class="af"><label>ירקרק</label><input type="color" id="c-sage"  value="#8aab8b" oninput="applyColors()"/></div>
+        <div class="af"><label>זהב</label><input type="color" id="c-gold"  value="#c9965a" oninput="applyColors()"/></div>
+        <div class="af"><label>כהה (footer)</label><input type="color" id="c-dark"  value="#2e1a12" oninput="applyColors()"/></div>
+      </div>
+      <button class="btn-save outline" onclick="resetColors()"><i class="fas fa-undo"></i>איפוס צבעים</button>
+    </div>
+  </div>
+
+  <!-- ③ גופנים -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-font me-2" style="color:var(--rose)"></i>גופנים</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>גופן כותרות</label><div class="font-row" id="hFontRow"></div></div>
+      <div class="af" style="margin-top:10px"><label>גופן טקסט</label><div class="font-row" id="bFontRow"></div></div>
+    </div>
+  </div>
+
+  <!-- ④ תמונות -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-image me-2" style="color:var(--rose)"></i>תמונות</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תמונת הירו (URL)</label><input type="url" id="img-hero" placeholder="https://..."/></div>
+      <div class="af"><label>תמונת "מי אני" (URL)</label><input type="url" id="img-about" placeholder="https://..."/></div>
+      <button class="btn-save" onclick="applyImages()"><i class="fas fa-check"></i>עדכן תמונות</button>
+    </div>
+  </div>
+
+  <!-- ⑤ עריכת טקסטים -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-pen me-2" style="color:var(--rose)"></i>עריכת טקסטים</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">אזור ירו</div>
+      <div class="af"><label>כותרת שורה 1</label><input type="text" id="t-h1" value="גלו את הקסם" oninput="syncText('t-h1','ht1')"/></div>
+      <div class="af"><label>כותרת שורה 2</label><input type="text" id="t-h2" value="סבונים בעבודת יד" oninput="syncText('t-h2','ht2')"/></div>
+      <div class="af"><label>תיאור</label><textarea id="t-hsub" rows="3" oninput="syncText('t-hsub','hsub')">סדנאות סבונים ניידות שמגיעות ישר אליכם – לבית, למשרד, לאירועים ולחגיגות. חוויה יוצרת ובלתי נשכחת לכל הגילאים!</textarea></div>
+      <div class="af"><label>כפתור ראשי</label><input type="text" id="t-btn1" value="לסדנאות שלנו" oninput="syncText('t-btn1','hbtn1')"/></div>
+      <div class="af"><label>כפתור משני</label><input type="text" id="t-btn2" value="השאירו פרטים" oninput="syncText('t-btn2','hbtn2')"/></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">אודות</div>
+      <div class="af"><label>כותרת</label><input type="text" id="t-atit" value="שמי נינה, ואני יוצרת סבונים" oninput="syncText('t-atit','atit')"/></div>
+      <div class="af"><label>פסקה ראשונה</label><textarea id="t-ap1" rows="3" oninput="syncText('t-ap1','ap1')">לפני חמש שנים התאהבתי בעולם יצירת הסבונים. מה שהתחיל כתחביב קטן הפך לתשוקה אמיתית ולעסק משגשג שמביא שמחה ויצירה לאנשים רבים.</textarea></div>
+      <div class="af"><label>פסקה שניה</label><textarea id="t-ap2" rows="3" oninput="syncText('t-ap2','ap2')">אני מציעה סדנאות ניידות שמגיעות אליכם, בין אם זה לבית, למשרד, ליום הולדת, לגיבוש עובדים או לכל אירוע אחר.</textarea></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">סדנאות</div>
+      <div class="af"><label>כותרת</label><input type="text" id="t-wstit" value="חוויה יוצרת לכל אירוע" oninput="syncText('t-wstit','wstit')"/></div>
+      <div class="af"><label>תת-כותרת</label><textarea id="t-wssub" rows="2" oninput="syncText('t-wssub','wssub')">הסדנאות שלנו פתוחות לכל הגילאים ומאפשרות לכל משתתף ליצור סבונים מותאמים אישית</textarea></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">גלריה</div>
+      <div class="af"><label>כותרת</label><input type="text" id="t-gtit" value="מארזי מתנה וסבונים" oninput="syncText('t-gtit','gtit')"/></div>
+      <div class="af"><label>תת-כותרת</label><textarea id="t-gsub" rows="2" oninput="syncText('t-gsub','gsub')">מלבד סדנאות, ניתן להזמין מארזי מתנה לכל אירוע – סבונים ריחניים וצבעוניים בהזמנה מראש</textarea></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">יצירת קשר</div>
+      <div class="af"><label>כותרת</label><input type="text" id="t-ctit" value="מוזמנים לפנות אלינו" oninput="syncText('t-ctit','ctit')"/></div>
+      <div class="af"><label>תת-כותרת</label><input type="text" id="t-csub" value="השאירו פרטים ונחזור אליכם בהקדם" oninput="syncText('t-csub','csub')"/></div>
+      <div class="af"><label>אזור פעילות</label><input type="text" id="t-area" value="צפון הארץ ומרכז" oninput="syncTextMulti('t-area',['area1','area2'])"/></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">פוטר</div>
+      <div class="af"><label>תיאור קצר</label><textarea id="t-fdesc" rows="3" oninput="syncText('t-fdesc','fdesc')">סדנאות סבונים ניידות לכל אירוע וגיל. מגיעים אליכם עם כל הציוד ומחזירים חיוכים וסבונים מהממים!</textarea></div>
+      <div class="af"><label>שורת זכויות</label><input type="text" id="t-copy" value="© 2024 סבונינה – כל הזכויות שמורות לנינה קרן" oninput="syncText('t-copy','fcopy')"/></div>
+
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור כל הטקסטים</button>
+    </div>
+  </div>
+
+  <!-- ⑥ פרטי קשר -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-phone me-2" style="color:var(--rose)"></i>פרטי קשר</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>טלפון / וואטסאפ</label><input type="text" id="inp-phone" placeholder="054-XXXXXXX"/></div>
+      <div class="af"><label>אימייל</label><input type="email" id="inp-email"/></div>
+      <div class="af"><label>קישור אינסטגרם</label><input type="url" id="inp-insta" placeholder="https://instagram.com/..."/></div>
+      <div class="af"><label>קישור וואטסאפ</label><input type="url" id="inp-wa" placeholder="https://wa.me/972..."/></div>
+      <button class="btn-save" onclick="applyContact()"><i class="fas fa-check"></i>עדכן פרטים</button>
+    </div>
+  </div>
+
+  <!-- ⑦ הוסף סדנה -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-plus-circle me-2" style="color:var(--rose)"></i>הוסף סדנה</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>שם הסדנה</label><input type="text" id="new-ws-title" placeholder="שם הסדנה"/></div>
+      <div class="af"><label>תיאור</label><textarea id="new-ws-desc" rows="2" placeholder="תיאור..."></textarea></div>
+      <div class="af"><label>מחיר</label><input type="text" id="new-ws-price" placeholder="₪XX לאדם"/></div>
+      <div class="af"><label>אייקון (emoji)</label><input type="text" id="new-ws-icon" placeholder="🧼" maxlength="4"/></div>
+      <button class="btn-save" onclick="addWorkshop()"><i class="fas fa-plus"></i>הוסף סדנה</button>
+    </div>
+  </div>
+
+  <!-- ⑧ הוסף המלצה -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-star me-2" style="color:var(--rose)"></i>הוסף המלצה</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>שם הלקוח/ה</label><input type="text" id="new-rev-name" placeholder="שם..."/></div>
+      <div class="af"><label>סוג אירוע</label><input type="text" id="new-rev-event" placeholder="יום הולדת..."/></div>
+      <div class="af"><label>טקסט</label><textarea id="new-rev-text" rows="3" placeholder="המלצה..."></textarea></div>
+      <button class="btn-save" onclick="addTestimonial()"><i class="fas fa-plus"></i>הוסף המלצה</button>
+    </div>
+  </div>
+
+  <!-- ⑨ שמירה -->
+  <div class="ap-section" style="border-bottom:none">
+    <div class="ap-body" style="display:block;padding-top:16px">
+      <button class="btn-save outline" onclick="saveAll()"><i class="fas fa-save"></i>שמור הכל (localStorage)</button>
+      <button class="btn-save danger" style="margin-top:8px" onclick="resetAll()"><i class="fas fa-trash"></i>איפוס לברירת מחדל</button>
+    </div>
+  </div>
+
+</div><!-- /adminPanel -->
+
+<!-- ═══════════════════════ SITE ═══════════════════════ -->
+
+<nav class="navbar-sabonina">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center w-100">
+      <a href="#" class="text-decoration-none d-flex align-items-center gap-2">
+        <span id="brandEmoji" style="font-size:2rem;transition:transform .3s">🧼</span>
+        <span class="brand-name" id="brandName">סבונינה</span>
+      </a>
+      <div class="d-none d-lg-flex align-items-center gap-1">
+        <a href="#about"     class="nav-link-custom">מי אני</a>
+        <a href="#workshops" class="nav-link-custom">הסדנאות</a>
+        <a href="#gallery"   class="nav-link-custom">תיק עבודות</a>
+        <a href="#reviews"   class="nav-link-custom">חוות דעת</a>
+        <a href="#contact"   class="nav-link-custom nav-cta">צרו קשר</a>
+      </div>
+      <button class="d-lg-none border-0 bg-transparent fs-4" onclick="document.getElementById('mobileMenu').style.display=document.getElementById('mobileMenu').style.display==='none'?'block':'none'">☰</button>
+    </div>
+    <div id="mobileMenu" style="display:none;padding:16px 0">
+      <a href="#about"     class="nav-link-custom d-block py-2">מי אני</a>
+      <a href="#workshops" class="nav-link-custom d-block py-2">הסדנאות</a>
+      <a href="#gallery"   class="nav-link-custom d-block py-2">תיק עבודות</a>
+      <a href="#reviews"   class="nav-link-custom d-block py-2">חוות דעת</a>
+      <a href="#contact"   class="nav-link-custom d-block py-2 fw-bold" style="color:var(--rose)!important">צרו קשר</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section" id="home">
+  <div class="container position-relative" style="z-index:1">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 order-lg-1 order-2">
+        <div class="hero-badge"><i class="fas fa-star me-1"></i>סדנאות ניידות לכל ישראל</div>
+        <h1 class="hero-title">
+          <span id="ht1" class="editable" contenteditable="false">גלו את הקסם</span><br>
+          של <span id="ht2" class="editable" contenteditable="false" style="color:var(--rose)">סבונים בעבודת יד</span>
+        </h1>
+        <p class="hero-subtitle editable" contenteditable="false" id="hsub">
+          סדנאות סבונים ניידות שמגיעות ישר אליכם – לבית, למשרד, לאירועים ולחגיגות. חוויה יוצרת ובלתי נשכחת לכל הגילאים!
+        </p>
+        <div class="hero-btns d-flex flex-wrap gap-3">
+          <a href="#workshops" class="btn-primary-custom"><i class="fas fa-soap me-2"></i><span id="hbtn1" class="editable" contenteditable="false">לסדנאות שלנו</span></a>
+          <a href="#contact"   class="btn-outline-custom"><i class="fas fa-envelope me-2"></i><span id="hbtn2" class="editable" contenteditable="false">השאירו פרטים</span></a>
+        </div>
+        <div class="d-flex gap-4 mt-4" style="opacity:.8">
+          <div><strong style="color:var(--brown);font-size:1.2rem">500+</strong><br><small>לקוחות מרוצים</small></div>
+          <div style="width:1px;background:var(--blush)"></div>
+          <div><strong style="color:var(--brown);font-size:1.2rem">5⭐</strong><br><small>דירוג ממוצע</small></div>
+          <div style="width:1px;background:var(--blush)"></div>
+          <div><strong style="color:var(--brown);font-size:1.2rem">5 שנים</strong><br><small>ניסיון</small></div>
+        </div>
+      </div>
+      <div class="col-lg-6 order-lg-2 order-1">
+        <div class="hero-image-wrap text-center" style="position:relative">
+          <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600&q=80" alt="סדנת סבונים" class="hero-img" id="heroImg"/>
+          <div class="hero-float-badge">
+            <span style="font-size:22px">🧼</span>
+            <div><div style="font-size:13px;font-weight:700;color:var(--brown)">100% טבעי</div><div style="font-size:11px;color:#9a7060">ללא חומרים מזיקים</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" alt="נינה" class="about-img" id="aboutImg"/>
+      </div>
+      <div class="col-lg-7">
+        <div class="section-label">✦ מי אני</div>
+        <h2 class="section-title editable" contenteditable="false" id="atit">שמי נינה, ואני יוצרת סבונים</h2>
+        <div class="section-divider rtl"></div>
+        <p class="about-text editable" contenteditable="false" id="ap1">לפני חמש שנים התאהבתי בעולם יצירת הסבונים. מה שהתחיל כתחביב קטן הפך לתשוקה אמיתית ולעסק משגשג שמביא שמחה ויצירה לאנשים רבים.</p>
+        <p class="about-text mt-3 editable" contenteditable="false" id="ap2">אני מציעה סדנאות ניידות שמגיעות אליכם, בין אם זה לבית, למשרד, ליום הולדת, לגיבוש עובדים או לכל אירוע אחר.</p>
+        <div class="row g-3 mt-2">
+          <div class="col-4"><div class="about-stat"><span class="num">500+</span><span class="lbl">לקוחות מרוצים</span></div></div>
+          <div class="col-4"><div class="about-stat"><span class="num">5</span><span class="lbl">שנות ניסיון</span></div></div>
+          <div class="col-4"><div class="about-stat"><span class="num">∞</span><span class="lbl">יצירתיות</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKSHOPS -->
+<section class="workshops-section" id="workshops">
+  <div class="container position-relative" style="z-index:1">
+    <div class="text-center mb-5">
+      <div class="section-label" style="color:var(--blush)">✦ הסדנאות שלנו</div>
+      <h2 class="section-title" style="color:#fff" id="wstit">חוויה יוצרת לכל אירוע</h2>
+      <div class="section-divider"></div>
+      <p style="color:rgba(255,255,255,.75);max-width:500px;margin:0 auto" id="wssub">הסדנאות שלנו פתוחות לכל הגילאים ומאפשרות לכל משתתף ליצור סבונים מותאמים אישית</p>
+    </div>
+    <div class="row g-4" id="workshopsContainer"></div>
+    <div class="col-lg-4 col-md-6 mt-4" id="addWsCol" style="display:none">
+      <button class="add-card-btn" onclick="focusAddWs()"><i class="fas fa-plus-circle" style="font-size:2rem"></i><span>הוסף סדנה חדשה</span></button>
+    </div>
+    <div class="text-center mt-5">
+      <a href="#contact" class="btn-primary-custom"><i class="fas fa-calendar-alt me-2"></i>קבעו סדנה עכשיו</a>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery-section" id="gallery">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">✦ תיק עבודות</div>
+      <h2 class="section-title editable" contenteditable="false" id="gtit">מארזי מתנה וסבונים</h2>
+      <div class="section-divider"></div>
+      <p style="color:#7a5545;max-width:480px;margin:0 auto" class="editable" contenteditable="false" id="gsub">מלבד סדנאות, ניתן להזמין מארזי מתנה לכל אירוע – סבונים ריחניים וצבעוניים בהזמנה מראש</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סבוני מתנה</span></div></div>
+      <div class="gallery-item" style="grid-row:span 2"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" alt="" style="height:100%"/><div class="gallery-overlay"><span>מארז מיוחד</span></div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סדנת ילדים</span></div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סבונים טבעיים</span></div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80" alt=""/><div class="gallery-overlay"><span>מארז לאירוע</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section" id="reviews">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">✦ מה אומרים עלינו</div>
+      <h2 class="section-title">חוות דעת מהלב</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4" id="testimonialsContainer"></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">✦ יצירת קשר</div>
+      <h2 class="section-title editable" contenteditable="false" id="ctit">מוזמנים לפנות אלינו</h2>
+      <div class="section-divider"></div>
+      <p style="color:#7a5545" class="editable" contenteditable="false" id="csub">השאירו פרטים ונחזור אליכם בהקדם</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-7">
+        <div class="contact-card">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label-custom">שם מלא *</label><input type="text" class="form-control-custom" placeholder="שמך המלא"/></div>
+            <div class="col-md-6"><label class="form-label-custom">טלפון *</label><input type="tel" class="form-control-custom" placeholder="05X-XXXXXXX"/></div>
+            <div class="col-12"><label class="form-label-custom">אימייל</label><input type="email" class="form-control-custom" placeholder="example@gmail.com"/></div>
+            <div class="col-md-6">
+              <label class="form-label-custom">סוג האירוע</label>
+              <select class="form-control-custom"><option>בחרו...</option><option>יום הולדת</option><option>גיבוש עובדים</option><option>בר/בת מצווה</option><option>חינה / מסיבת רווקות</option><option>כיתת אמהות</option><option>מארז מתנה</option><option>אחר</option></select>
+            </div>
+            <div class="col-md-6"><label class="form-label-custom">מספר משתתפים</label><input type="number" class="form-control-custom" placeholder="כמה אנשים?"/></div>
+            <div class="col-12"><label class="form-label-custom">הודעה</label><textarea class="form-control-custom" rows="4" placeholder="ספרו לנו על האירוע שלכם..."></textarea></div>
+            <div class="col-12"><button class="btn-primary-custom w-100" onclick="showToast('📩 הודעתך נשלחה! נחזור אליך בקרוב')" style="padding:14px;font-size:16px;border-radius:12px;border:none"><i class="fas fa-paper-plane me-2"></i>שלחו הודעה</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="contact-card h-100 d-flex flex-column justify-content-between">
+          <div>
+            <h4 style="color:var(--brown);margin-bottom:20px">פרטי התקשרות</h4>
+            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-phone"></i></div><div class="ci-text"><div class="ci-label">טלפון / וואטסאפ</div><a href="#" id="phoneDisplay">054-4544483</a></div></div>
+            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-envelope"></i></div><div class="ci-text"><div class="ci-label">אימייל</div><a href="#" id="emailDisplay">ninakeren527@gmail.com</a></div></div>
+            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-map-marker-alt"></i></div><div class="ci-text"><div class="ci-label">אזור פעילות</div><span id="area1">צפון הארץ ומרכז</span></div></div>
+          </div>
+          <div class="mt-4">
+            <a href="https://wa.me/972544544483" target="_blank" class="btn-primary-custom d-block text-center" id="waBtnContact" style="background:#25d366;border-radius:12px;padding:14px;font-size:15px">
+              <i class="fab fa-whatsapp me-2"></i>שלחי הודעה בוואטסאפ
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-main">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="footer-logo-text"><span id="footerEmoji">🧼</span> <span id="footerName">סבונינה</span></div>
+        <p style="font-size:14px;line-height:1.7;margin-top:10px;opacity:.7" id="fdesc">סדנאות סבונים ניידות לכל אירוע וגיל. מגיעים אליכם עם כל הציוד ומחזירים חיוכים וסבונים מהממים!</p>
+        <div class="footer-social mt-3">
+          <a href="https://www.instagram.com/nina_keren_soap" id="igLink" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://wa.me/972544544483" id="waLink" target="_blank"><i class="fab fa-whatsapp"></i></a>
+          <a href="mailto:ninakeren527@gmail.com" id="mailLink"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-2 col-6">
+        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">ניווט מהיר</div>
+        <a href="#home" class="footer-link">ראשי</a><a href="#about" class="footer-link">מי אני</a><a href="#workshops" class="footer-link">הסדנאות</a><a href="#gallery" class="footer-link">תיק עבודות</a><a href="#reviews" class="footer-link">חוות דעת</a><a href="#contact" class="footer-link">יצירת קשר</a>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">הסדנאות שלנו</div>
+        <a href="#workshops" class="footer-link">סדנת יום הולדת</a><a href="#workshops" class="footer-link">גיבוש עובדים</a><a href="#workshops" class="footer-link">בת מצווה / חינה</a><a href="#workshops" class="footer-link">סדנה לילדים</a><a href="#workshops" class="footer-link">מארזי מתנה</a>
+      </div>
+      <div class="col-lg-3">
+        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">צרו קשר</div>
+        <p style="font-size:14px;opacity:.7;line-height:2">
+          <i class="fas fa-phone me-2" style="color:var(--rose)"></i><span id="footerPhone">054-4544483</span><br>
+          <i class="fas fa-envelope me-2" style="color:var(--rose)"></i><span id="footerEmail">ninakeren527@gmail.com</span><br>
+          <i class="fas fa-map-marker-alt me-2" style="color:var(--rose)"></i><span id="area2">צפון הארץ ומרכז</span>
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom d-flex justify-content-between flex-wrap gap-2">
+      <span id="fcopy">© 2024 סבונינה – כל הזכויות שמורות לנינה קרן</span>
+      <span>עוצב באהבה 🧼</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   DATA
+═══════════════════════════════════════ */
+const DW = [
+  {icon:"🎉",title:"סדנת יום הולדת",  desc:"חגיגת יום הולדת שלא תישכח! כל ילד/ה יוצר סבון צבעוני ומיוחד לקחת הביתה. מגיעים עם כל הציוד.",            price:"₪45 לאדם",  tags:["ילדים","חגיגה"]},
+  {icon:"🏢",title:"גיבוש עובדים",    desc:"פעילות גיבוש יוצרת ומרגיעה לצוות שלכם. מאות צוותים כבר חוו את הקסם. ניתן להתאים לכל קבוצה.",             price:"₪55 לאדם",  tags:["קבוצות","מקצועי"]},
+  {icon:"💍",title:"חינה ורווקות",    desc:"חוויה אינטימית ומיוחדת לחברות הכי קרובות. נוצרים סבונים רומנטיים בצבעים וריחות מפנקים.",                  price:"₪60 לאדם",  tags:["נשים","רומנטי"]},
+  {icon:"🧒",title:"סדנה לילדים",     desc:"סדנה כיפית ובטוחה לילדים מגיל 5. עם חומרים בטוחים לחלוטין, ילדים יוצרים סבונים מיוחדים.",                 price:"₪40 לאדם",  tags:["ילדים","כיף"]},
+  {icon:"🎁",title:"מארזי מתנה",      desc:"מארזי סבונים ייחודיים לכל אירוע. ניתן להתאים אישית עם עיצוב, ריח וצבע לפי בקשה.",                          price:"החל מ-₪30", tags:["מתנות","אישי"]},
+  {icon:"✡️",title:"סדנת חגים",      desc:"סדנאות מיוחדות לחגים – חנוכה, פסח, ראש השנה ועוד. סבונים בעיצוב חגיגי עם ריחות עונתיים.",                  price:"₪50 לאדם",  tags:["חגים","מיוחד"]}
+];
+const DR = [
+  {text:"הסדנה ליום ההולדת של הבת שלי הייתה פשוט מדהימה! נינה הגיעה עם כל הציוד, הסבירה בסבלנות ועשתה חגיגה מושלמת. כל הילדים הלכו הביתה עם חיוך גדול.", name:"מיכל ל.", event:"יום הולדת",  initial:"מ"},
+  {text:"עשינו סדנת גיבוש לצוות שלנו עם סבונינה ולא יכולנו להיות מרוצים יותר. האווירה הייתה מעולה וכולם השתתפו בנלהבות וקיבלנו מוצר מקסים.",              name:"אלון ר.", event:"גיבוש חברה", initial:"א"},
+  {text:"הזמנתי מארז מתנה לאמא שלי ליום הולדת ה-60 והיא בכתה מרוב שמחה! הסבונים היו מהממים, אריזה יפהפייה ויחס אישי שאין לתאר.",                         name:"שירה כ.", event:"מארז מתנה",  initial:"ש"}
+];
+const THEMES = [
+  {name:"ורדרד", rose:"#d4836a",brown:"#6b3a2a",cream:"#fdf6ef",blush:"#f2c4b5",terra:"#b05a3b",sage:"#8aab8b",gold:"#c9965a",dark:"#2e1a12",lp:"#fce8df",dot:"#d4836a"},
+  {name:"לבנדר",rose:"#9b72cf",brown:"#4a2d6b",cream:"#f7f3ff",blush:"#d8c0f0",terra:"#7b4db5",sage:"#7b9e87",gold:"#b8936a",dark:"#1e0f35",lp:"#ede0ff",dot:"#9b72cf"},
+  {name:"ים",    rose:"#3a8fa3",brown:"#1d4e5f",cream:"#f0f9fb",blush:"#b0dde7",terra:"#2a7086",sage:"#5aaa8e",gold:"#c9a84c",dark:"#0d2930",lp:"#d5f0f5",dot:"#3a8fa3"},
+  {name:"ירוק",  rose:"#6d9e5e",brown:"#2e5428",cream:"#f4f9f2",blush:"#b8d8b0",terra:"#4a8040",sage:"#8aab8b",gold:"#c8a84b",dark:"#142810",lp:"#d8efd3",dot:"#6d9e5e"},
+  {name:"זהב",   rose:"#c9965a",brown:"#6b4020",cream:"#fdf8ef",blush:"#f0d8b8",terra:"#a07840",sage:"#8aab8b",gold:"#d4aa60",dark:"#2e1a08",lp:"#faebd8",dot:"#c9965a"},
+  {name:"לילה",  rose:"#c0a0e0",brown:"#9070b0",cream:"#1a1520",blush:"#5a3f7a",terra:"#b088cc",sage:"#6688aa",gold:"#c8a04c",dark:"#e8e0f0",lp:"#2e2040",dot:"#2a1a40"}
+];
+const HF = [
+  {l:"Playfair",v:"'Playfair Display',serif"},
+  {l:"Frank Ruhl",v:"'Frank Ruhl Libre',serif"},
+  {l:"Secular",v:"'Secular One',sans-serif"},
+  {l:"Rubik",v:"'Rubik',sans-serif"},
+  {l:"Heebo",v:"'Heebo',sans-serif"}
+];
+const BF = [
+  {l:"Heebo",v:"'Heebo',sans-serif"},
+  {l:"Rubik",v:"'Rubik',sans-serif"},
+  {l:"Secular",v:"'Secular One',sans-serif"},
+  {l:"Frank",v:"'Frank Ruhl Libre',serif"}
+];
+
+let workshops    = JSON.parse(localStorage.getItem('sab-ws'))  || JSON.parse(JSON.stringify(DW));
+let testimonials = JSON.parse(localStorage.getItem('sab-rv'))  || JSON.parse(JSON.stringify(DR));
+let adminMode    = false;
+
+/* ═══════════════════════════════════════
+   RENDER
+═══════════════════════════════════════ */
+function renderWorkshops() {
+  const c = document.getElementById('workshopsContainer');
+  c.innerHTML = '';
+  workshops.forEach((ws, i) => {
+    const col = document.createElement('div');
+    col.className = 'col-lg-4 col-md-6 fade-up';
+    col.style.animationDelay = (i * .08) + 's';
+    col.innerHTML = `
+      <div class="workshop-card" style="position:relative">
+        <button class="del-btn" onclick="delWs(${i})">✕</button>
+        <div class="workshop-icon">${ws.icon}</div>
+        <h4 class="editable" contenteditable="${adminMode}" data-f="ws-t-${i}">${ws.title}</h4>
+        <p class="editable" contenteditable="${adminMode}" data-f="ws-d-${i}">${ws.desc}</p>
+        <span class="workshop-price editable" contenteditable="${adminMode}" data-f="ws-p-${i}">${ws.price}</span>
+        <div class="mt-2">${ws.tags.map(t=>`<span class="workshop-tag">${t}</span>`).join('')}</div>
+      </div>`;
+    c.appendChild(col);
+    col.querySelectorAll('[data-f]').forEach(el => el.addEventListener('input', () => {
+      const f = el.dataset.f;
+      if (f.startsWith('ws-t-')) workshops[i].title = el.textContent;
+      if (f.startsWith('ws-d-')) workshops[i].desc  = el.textContent;
+      if (f.startsWith('ws-p-')) workshops[i].price = el.textContent;
+    }));
+  });
+  const ac = document.getElementById('addWsCol');
+  c.appendChild(ac);
+  ac.style.display = adminMode ? 'block' : 'none';
+}
+
+function renderTestimonials() {
+  const c = document.getElementById('testimonialsContainer');
+  c.innerHTML = '';
+  testimonials.forEach((rev, i) => {
+    const col = document.createElement('div');
+    col.className = 'col-lg-4 col-md-6 fade-up';
+    col.style.animationDelay = (i * .08) + 's';
+    col.innerHTML = `
+      <div class="testimonial-card" style="position:relative">
+        <button class="del-btn" onclick="delRev(${i})">✕</button>
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text editable" contenteditable="${adminMode}" data-f="rv-t-${i}">${rev.text}</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">${rev.initial}</div>
+          <div>
+            <div class="author-name  editable" contenteditable="${adminMode}" data-f="rv-n-${i}">${rev.name}</div>
+            <div class="author-event editable" contenteditable="${adminMode}" data-f="rv-e-${i}">${rev.event}</div>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(col);
+    col.querySelectorAll('[data-f]').forEach(el => el.addEventListener('input', () => {
+      const f = el.dataset.f;
+      if (f.startsWith('rv-t-')) testimonials[i].text  = el.textContent;
+      if (f.startsWith('rv-n-')) testimonials[i].name  = el.textContent;
+      if (f.startsWith('rv-e-')) testimonials[i].event = el.textContent;
+    }));
+  });
+}
+
+/* ═══════════════════════════════════════
+   ACCORDION
+═══════════════════════════════════════ */
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  // close all
+  document.querySelectorAll('.ap-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.ap-section-header').forEach(h => h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); header.classList.add('open'); }
+}
+
+/* ═══════════════════════════════════════
+   ADMIN TOGGLE
+═══════════════════════════════════════ */
+function toggleAdmin() {
+  adminMode = !adminMode;
+  document.body.classList.toggle('admin-mode', adminMode);
+  document.getElementById('adminPanel').classList.toggle('show', adminMode);
+  document.getElementById('adminToggle').classList.toggle('active', adminMode);
+  document.getElementById('adminIcon').className   = adminMode ? 'fas fa-times' : 'fas fa-cog';
+  document.getElementById('adminLabel').textContent = adminMode ? 'סגור עריכה' : 'ניהול תוכן';
+  document.querySelectorAll('.editable').forEach(el => el.contentEditable = adminMode);
+  renderWorkshops();
+  renderTestimonials();
+}
+
+/* ═══════════════════════════════════════
+   LOGO
+═══════════════════════════════════════ */
+function liveLogoUpdate() {
+  const e = document.getElementById('b-emoji').value;
+  const n = document.getElementById('b-name').value;
+  document.getElementById('brandEmoji').textContent = e;
+  document.getElementById('brandName').textContent  = n;
+  document.getElementById('footerEmoji').textContent = e;
+  document.getElementById('footerName').textContent  = n;
+}
+function saveLogo() {
+  liveLogoUpdate();
+  const s = document.getElementById('b-title').value;
+  document.title = s;
+  localStorage.setItem('sab-logo', JSON.stringify({ e: document.getElementById('b-emoji').value, n: document.getElementById('b-name').value, s }));
+  showToast('לוגו נשמר!');
+}
+
+/* ═══════════════════════════════════════
+   COLORS
+═══════════════════════════════════════ */
+function applyColors(t) {
+  const r = document.documentElement;
+  const rose  = t ? t.rose  : document.getElementById('c-rose').value;
+  const brown = t ? t.brown : document.getElementById('c-brown').value;
+  const cream = t ? t.cream : document.getElementById('c-cream').value;
+  const blush = t ? t.blush : document.getElementById('c-blush').value;
+  const terra = t ? t.terra : document.getElementById('c-terra').value;
+  const sage  = t ? t.sage  : document.getElementById('c-sage').value;
+  const gold  = t ? t.gold  : document.getElementById('c-gold').value;
+  const dark  = t ? t.dark  : document.getElementById('c-dark').value;
+  const lp    = t ? t.lp    : lighten(rose, 45);
+  r.style.setProperty('--rose',       rose);
+  r.style.setProperty('--brown',      brown);
+  r.style.setProperty('--cream',      cream);
+  r.style.setProperty('--blush',      blush);
+  r.style.setProperty('--terracotta', terra);
+  r.style.setProperty('--sage',       sage);
+  r.style.setProperty('--gold',       gold);
+  r.style.setProperty('--dark',       dark);
+  r.style.setProperty('--light-pink', lp);
+  if (t) {
+    document.getElementById('c-rose').value  = rose;
+    document.getElementById('c-brown').value = brown;
+    document.getElementById('c-cream').value = cream;
+    document.getElementById('c-blush').value = blush;
+    document.getElementById('c-terra').value = terra;
+    document.getElementById('c-sage').value  = sage;
+    document.getElementById('c-gold').value  = gold;
+    document.getElementById('c-dark').value  = dark;
+  }
+  localStorage.setItem('sab-colors', JSON.stringify({ rose, brown, cream, blush, terra, sage, gold, dark, lp }));
+}
+function lighten(hex, p) {
+  try {
+    const n = parseInt(hex.slice(1), 16);
+    const R = Math.min(255, (n >> 16) + p);
+    const G = Math.min(255, ((n >> 8) & 255) + p);
+    const B = Math.min(255, (n & 255) + p);
+    return '#' + [R,G,B].map(x => x.toString(16).padStart(2,'0')).join('');
+  } catch(e) { return hex; }
+}
+function resetColors() {
+  applyColors(THEMES[0]);
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  showToast('↩ צבעים אופסו');
+}
+function buildThemeDots() {
+  const c = document.getElementById('themePresets');
+  THEMES.forEach((t, i) => {
+    const d = document.createElement('div');
+    d.className = 'theme-dot';
+    d.style.background = t.dot;
+    d.title = t.name;
+    d.onclick = () => {
+      applyColors(t);
+      document.querySelectorAll('.theme-dot').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      showToast('🎨 ערכת "' + t.name + '" הופעלה!');
+    };
+    c.appendChild(d);
+  });
+}
+
+/* ═══════════════════════════════════════
+   FONTS
+═══════════════════════════════════════ */
+function buildFonts() {
+  function makeRow(arr, container, cssVar, storageKey, isBody) {
+    arr.forEach(f => {
+      const b = document.createElement('button');
+      b.className = 'font-btn'; b.textContent = f.l; b.style.fontFamily = f.v;
+      b.onclick = () => {
+        document.documentElement.style.setProperty(cssVar, f.v);
+        if (isBody) document.body.style.fontFamily = f.v;
+        else document.querySelectorAll('h1,h2,h3,h4').forEach(el => el.style.fontFamily = f.v);
+        container.querySelectorAll('.font-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        localStorage.setItem(storageKey, f.v);
+        showToast(isBody ? 'גופן טקסט עודכן!' : 'גופן כותרות עודכן!');
+      };
+      container.appendChild(b);
+    });
+  }
+  makeRow(HF, document.getElementById('hFontRow'), '--heading-font-override', 'sab-hf', false);
+  makeRow(BF, document.getElementById('bFontRow'), '--body-font-override',    'sab-bf', true);
+}
+
+/* ═══════════════════════════════════════
+   TEXT SYNC
+═══════════════════════════════════════ */
+function syncText(inputId, targetId) {
+  const el = document.getElementById(targetId);
+  if (el) el.textContent = document.getElementById(inputId).value;
+}
+function syncTextMulti(inputId, ids) {
+  const val = document.getElementById(inputId).value;
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = val; });
+}
+
+/* ═══════════════════════════════════════
+   IMAGES
+═══════════════════════════════════════ */
+function applyImages() {
+  const h = document.getElementById('img-hero').value.trim();
+  const a = document.getElementById('img-about').value.trim();
+  if (h) { document.getElementById('heroImg').src  = h; localStorage.setItem('sab-hi', h); }
+  if (a) { document.getElementById('aboutImg').src = a; localStorage.setItem('sab-ai', a); }
+  showToast('תמונות עודכנו!');
+}
+
+/* ═══════════════════════════════════════
+   CONTACT
+═══════════════════════════════════════ */
+function applyContact() {
+  const ph = document.getElementById('inp-phone').value.trim();
+  const em = document.getElementById('inp-email').value.trim();
+  const ig = document.getElementById('inp-insta').value.trim();
+  const wa = document.getElementById('inp-wa').value.trim();
+  if (ph) {
+    ['phoneDisplay','footerPhone'].forEach(id => document.getElementById(id).textContent = ph);
+    localStorage.setItem('sab-ph', ph);
+  }
+  if (em) {
+    document.getElementById('emailDisplay').textContent = em;
+    document.getElementById('footerEmail').textContent  = em;
+    document.getElementById('mailLink').href = 'mailto:' + em;
+    localStorage.setItem('sab-em', em);
+  }
+  if (ig) { document.getElementById('igLink').href = ig; localStorage.setItem('sab-ig', ig); }
+  if (wa) {
+    ['waFab','waLink','waBtnContact'].forEach(id => { const el=document.getElementById(id); if(el) el.href = wa; });
+    localStorage.setItem('sab-wa', wa);
+  }
+  showToast('פרטי קשר עודכנו!');
+}
+
+/* ═══════════════════════════════════════
+   ADD / DELETE
+═══════════════════════════════════════ */
+function addWorkshop() {
+  const title = document.getElementById('new-ws-title').value.trim();
+  if (!title) { showToast('⚠ נא להזין שם!'); return; }
+  workshops.push({
+    icon:  document.getElementById('new-ws-icon').value.trim()  || '🧼',
+    title, desc:  document.getElementById('new-ws-desc').value.trim(),
+    price: document.getElementById('new-ws-price').value.trim(), tags: []
+  });
+  renderWorkshops();
+  ['new-ws-title','new-ws-desc','new-ws-price','new-ws-icon'].forEach(id => document.getElementById(id).value = '');
+  showToast('סדנה נוספה!');
+}
+function delWs(i) { if (!confirm('למחוק?')) return; workshops.splice(i,1); renderWorkshops(); }
+
+function addTestimonial() {
+  const name = document.getElementById('new-rev-name').value.trim();
+  const text = document.getElementById('new-rev-text').value.trim();
+  if (!name || !text) { showToast('⚠ נא למלא שם וטקסט!'); return; }
+  testimonials.push({ name, text, event: document.getElementById('new-rev-event').value.trim(), initial: name[0] });
+  renderTestimonials();
+  ['new-rev-name','new-rev-event','new-rev-text'].forEach(id => document.getElementById(id).value = '');
+  showToast('המלצה נוספה!');
+}
+function delRev(i) { if (!confirm('למחוק?')) return; testimonials.splice(i,1); renderTestimonials(); }
+
+function focusAddWs() {
+  const sec = document.querySelector('.ap-section:nth-child(8) .ap-section-header');
+  if (sec) { sec.click(); }
+  setTimeout(() => document.getElementById('new-ws-title').focus(), 200);
+}
+
+/* ═══════════════════════════════════════
+   SAVE / RESET
+═══════════════════════════════════════ */
+function saveAll() {
+  localStorage.setItem('sab-ws', JSON.stringify(workshops));
+  localStorage.setItem('sab-rv', JSON.stringify(testimonials));
+  // texts
+  const TM = {
+    't-h1':'ht1','t-h2':'ht2','t-hsub':'hsub','t-btn1':'hbtn1','t-btn2':'hbtn2',
+    't-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
+    't-wstit':'wstit','t-wssub':'wssub',
+    't-gtit':'gtit','t-gsub':'gsub',
+    't-ctit':'ctit','t-csub':'csub',
+    't-fdesc':'fdesc','t-copy':'fcopy'
+  };
+  Object.entries(TM).forEach(([inp, tgt]) => {
+    const el = document.getElementById(inp);
+    if (el) localStorage.setItem('sab-txt-' + tgt, el.tagName === 'TEXTAREA' ? el.value : el.value);
+  });
+  const area = document.getElementById('t-area');
+  if (area) localStorage.setItem('sab-txt-area', area.value);
+  showToast('✓ הכל נשמר!');
+}
+
+function resetAll() {
+  if (!confirm('לאפס את כל התוכן לברירת המחדל?')) return;
+  Object.keys(localStorage).filter(k => k.startsWith('sab-')).forEach(k => localStorage.removeItem(k));
+  workshops    = JSON.parse(JSON.stringify(DW));
+  testimonials = JSON.parse(JSON.stringify(DR));
+  applyColors(THEMES[0]);
+  renderWorkshops(); renderTestimonials();
+  showToast('↩ אופס לברירת מחדל');
+}
+
+/* ═══════════════════════════════════════
+   LOAD SAVED
+═══════════════════════════════════════ */
+function loadSaved() {
+  // colors
+  const sc = localStorage.getItem('sab-colors');
+  if (sc) applyColors(JSON.parse(sc));
+
+  // fonts
+  const hf = localStorage.getItem('sab-hf');
+  const bf = localStorage.getItem('sab-bf');
+  if (hf) { document.documentElement.style.setProperty('--heading-font-override', hf); document.querySelectorAll('h1,h2,h3,h4').forEach(el => el.style.fontFamily = hf); }
+  if (bf) { document.documentElement.style.setProperty('--body-font-override', bf); document.body.style.fontFamily = bf; }
+
+  // logo
+  const lo = localStorage.getItem('sab-logo');
+  if (lo) {
+    const l = JSON.parse(lo);
+    document.getElementById('b-emoji').value = l.e;
+    document.getElementById('b-name').value  = l.n;
+    document.getElementById('b-title').value = l.s;
+    document.getElementById('brandEmoji').textContent  = l.e;
+    document.getElementById('brandName').textContent   = l.n;
+    document.getElementById('footerEmoji').textContent = l.e;
+    document.getElementById('footerName').textContent  = l.n;
+    document.title = l.s;
+  }
+
+  // images
+  const hi = localStorage.getItem('sab-hi'); if (hi) document.getElementById('heroImg').src  = hi;
+  const ai = localStorage.getItem('sab-ai'); if (ai) document.getElementById('aboutImg').src = ai;
+
+  // contact
+  const ph = localStorage.getItem('sab-ph');
+  const em = localStorage.getItem('sab-em');
+  const ig = localStorage.getItem('sab-ig');
+  const wa = localStorage.getItem('sab-wa');
+  if (ph) { ['phoneDisplay','footerPhone'].forEach(id => document.getElementById(id).textContent = ph); document.getElementById('inp-phone').value = ph; }
+  if (em) { document.getElementById('emailDisplay').textContent = em; document.getElementById('footerEmail').textContent = em; document.getElementById('mailLink').href = 'mailto:'+em; document.getElementById('inp-email').value = em; }
+  if (ig) { document.getElementById('igLink').href = ig; document.getElementById('inp-insta').value = ig; }
+  if (wa) { ['waFab','waLink','waBtnContact'].forEach(id => { const el=document.getElementById(id); if(el) el.href=wa; }); document.getElementById('inp-wa').value = wa; }
+
+  // texts
+  const TM = {
+    't-h1':'ht1','t-h2':'ht2','t-hsub':'hsub','t-btn1':'hbtn1','t-btn2':'hbtn2',
+    't-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
+    't-wstit':'wstit','t-wssub':'wssub',
+    't-gtit':'gtit','t-gsub':'gsub',
+    't-ctit':'ctit','t-csub':'csub',
+    't-fdesc':'fdesc','t-copy':'fcopy'
+  };
+  Object.entries(TM).forEach(([inp, tgt]) => {
+    const saved = localStorage.getItem('sab-txt-' + tgt);
+    if (saved) {
+      const ie = document.getElementById(inp); const te = document.getElementById(tgt);
+      if (ie) ie.value = saved;
+      if (te) te.textContent = saved;
+    }
+  });
+  const sa = localStorage.getItem('sab-txt-area');
+  if (sa) { const ie = document.getElementById('t-area'); if (ie) ie.value = sa; ['area1','area2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=sa; }); }
+}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+function showToast(msg = '✓ נשמר!') {
+  const t = document.getElementById('toastSave');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.editable').forEach(el => el.contentEditable = 'false');
+  buildThemeDots();
+  buildFonts();
+  renderWorkshops();
+  renderTestimonials();
+  loadSaved();
+
+  // smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const h = a.getAttribute('href');
+      if (h === '#') return;
+      e.preventDefault();
+      const t = document.querySelector(h);
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const m = document.getElementById('mobileMenu');
+      if (m) m.style.display = 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>
