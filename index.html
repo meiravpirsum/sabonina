@@ -296,16 +296,16 @@
     #a11yBtn {
       position: fixed; bottom: 90px; right: 24px; width: 52px; height: 52px;
       background: #1a56a0; border-radius: 50%; border: none; color: #fff;
-      font-size: 22px; cursor: pointer; z-index: 1000;
+      font-size: 22px; cursor: pointer; z-index: 9990;
       box-shadow: 0 4px 18px rgba(26,86,160,.45); transition: transform .3s;
-      display: flex; align-items: center; justify-content: center;
+      display: flex !important; align-items: center; justify-content: center;
     }
     #a11yBtn:hover { transform: scale(1.1); }
     #a11yPanel {
       display: none; position: fixed; bottom: 152px; right: 20px;
       background: #fff; border-radius: 18px; padding: 18px 16px;
       width: 230px; box-shadow: 0 8px 32px rgba(0,0,0,.18);
-      z-index: 1001; border: 2px solid #1a56a0;
+      z-index: 9991; border: 2px solid #1a56a0;
       font-family: 'Heebo', sans-serif;
     }
     #a11yPanel.show { display: block; }
@@ -1676,11 +1676,15 @@ document.addEventListener('click', e => {
 ══════════════════════════════════════ */
 function initCookies() {
   const consent = localStorage.getItem('sab-cookie-consent');
-  if (!consent) {
-    document.getElementById('cookieBanner').classList.remove('hide');
-  } else {
-    document.getElementById('cookieBanner').classList.add('hide');
+  let hide = false;
+  if (consent) {
+    try {
+      const c = JSON.parse(consent);
+      // הסתר רק אם ההסכמה ניתנה בשנה האחרונה
+      if (c.ts && (Date.now() - c.ts) < 365 * 24 * 60 * 60 * 1000) hide = true;
+    } catch(e) {}
   }
+  if (hide) document.getElementById('cookieBanner').classList.add('hide');
 }
 
 function acceptAllCookies() {
@@ -1947,6 +1951,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTestimonials();
   loadSaved();
   loadA11y();
+  // נקה הסכמת עוגיות ישנה ללא חותמת זמן
+  const oldConsent = localStorage.getItem('sab-cookie-consent');
+  if (oldConsent) {
+    try { if (!JSON.parse(oldConsent).ts) localStorage.removeItem('sab-cookie-consent'); } catch(e) { localStorage.removeItem('sab-cookie-consent'); }
+  }
   initCookies();
 
   // אם כבר מחוברת באותו session – הצגי את הכפתור
