@@ -296,10 +296,55 @@
     @keyframes shake    { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
     .fade-up { opacity:0; animation: fadeUp .8s ease forwards; }
 
+    /* ── ICON FIELD ── */
+    .icon-field { display:flex; gap:6px; align-items:center; }
+    .icon-field input { flex:1; }
+    .pick-emoji-btn, .pick-fa-btn {
+      flex-shrink:0; background:var(--light-pink); border:1.5px solid var(--rose);
+      color:var(--brown); border-radius:8px; padding:6px 10px; cursor:pointer;
+      font-family:'Heebo',sans-serif; font-size:12px; font-weight:700; white-space:nowrap;
+      transition:background .2s;
+    }
+    .pick-emoji-btn:hover, .pick-fa-btn:hover { background:var(--blush); }
+
+    /* ── PICKER MODAL ── */
+    #pickerModal {
+      display:none; position:fixed; inset:0; z-index:10001;
+      background:rgba(46,26,18,.5); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center;
+    }
+    #pickerModal.show { display:flex; }
+    .picker-box {
+      background:#fff; border-radius:20px; padding:24px;
+      width:340px; max-height:80vh; overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      animation:fadeDown .25s ease both;
+    }
+    .picker-box h5 { font-family:'Heebo',sans-serif; font-size:14px; font-weight:700; color:var(--brown); margin-bottom:14px; }
+    .picker-search { width:100%; border:1.5px solid #e8ddd8; border-radius:8px; padding:7px 10px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:12px; }
+    .picker-search:focus { outline:none; border-color:var(--rose); }
+    .picker-cat-title { font-size:10px; font-weight:700; color:#bbb; text-transform:uppercase; letter-spacing:.5px; margin:10px 0 6px; }
+    .emoji-grid { display:flex; flex-wrap:wrap; gap:4px; }
+    .emoji-btn {
+      width:38px; height:38px; font-size:20px; border:1.5px solid transparent;
+      border-radius:8px; cursor:pointer; background:transparent; display:flex;
+      align-items:center; justify-content:center; transition:all .15s;
+    }
+    .emoji-btn:hover { background:var(--light-pink); border-color:var(--rose); transform:scale(1.15); }
+    .fa-grid { display:flex; flex-wrap:wrap; gap:6px; }
+    .fa-opt {
+      width:44px; height:44px; border:1.5px solid #e8ddd8; border-radius:8px;
+      cursor:pointer; background:#fff; display:flex; align-items:center; justify-content:center;
+      font-size:17px; color:var(--brown); transition:all .15s;
+    }
+    .fa-opt:hover { background:var(--light-pink); border-color:var(--rose); transform:scale(1.1); }
+    .picker-close { width:100%; margin-top:16px; background:transparent; color:#aaa; border:none; font-size:13px; cursor:pointer; font-family:'Heebo',sans-serif; }
+
     @media (max-width:768px) {
       .hero-section { min-height:auto; padding:60px 0; }
       .gallery-grid { grid-template-columns:repeat(2,1fr); }
       #adminPanel { width:100%; }
+      .picker-box { width:95vw; }
     }
   </style>
 </head>
@@ -308,6 +353,16 @@
 <div class="toast-save" id="toastSave">✓ נשמר!</div>
 <div class="admin-overlay-hint"><i class="fas fa-pen me-2"></i>מצב עריכה – לחץ על כל טקסט לעריכה</div>
 <a href="https://wa.me/972544544483" class="whatsapp-fab" id="waFab" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
+<!-- EMOJI / FA PICKER MODAL -->
+<div id="pickerModal">
+  <div class="picker-box" id="pickerBox">
+    <h5 id="pickerTitle">בחרי אמוג'י</h5>
+    <input type="text" class="picker-search" id="pickerSearch" placeholder="חפשי..." oninput="filterPicker()"/>
+    <div id="pickerContent"></div>
+    <button class="picker-close" onclick="closePicker()">ביטול</button>
+  </div>
+</div>
 
 <!-- PASSWORD MODAL -->
 <div id="pwModal">
@@ -402,43 +457,152 @@
     </div>
   </div>
 
-  <!-- ⑤ עריכת טקסטים -->
+  <!-- ④ב תיק עבודות – תמונות -->
   <div class="ap-section">
     <div class="ap-section-header" onclick="toggleSection(this)">
-      <span><i class="fas fa-pen me-2" style="color:var(--rose)"></i>עריכת טקסטים</span>
+      <span><i class="fas fa-images me-2" style="color:var(--rose)"></i>תיק עבודות – תמונות</span>
       <span class="arrow">▼</span>
     </div>
     <div class="ap-body">
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">אזור ירו</div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:12px;line-height:1.5">הדביקי קישור לתמונה (URL). ניתן להשתמש ב-Google Drive, Dropbox, Unsplash וכו'.</div>
+      <div class="af"><label>תמונה 1 – כיתוב</label><input type="text" id="glbl-inp-0" value="סבוני מתנה" oninput="document.getElementById('glbl-0').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 1 – URL</label><input type="url" id="gimg-inp-0" placeholder="https://..."/></div>
+      <div class="af"><label>תמונה 2 – כיתוב</label><input type="text" id="glbl-inp-1" value="מארז מיוחד" oninput="document.getElementById('glbl-1').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 2 – URL</label><input type="url" id="gimg-inp-1" placeholder="https://..."/></div>
+      <div class="af"><label>תמונה 3 – כיתוב</label><input type="text" id="glbl-inp-2" value="סדנת ילדים" oninput="document.getElementById('glbl-2').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 3 – URL</label><input type="url" id="gimg-inp-2" placeholder="https://..."/></div>
+      <div class="af"><label>תמונה 4 – כיתוב</label><input type="text" id="glbl-inp-3" value="סבונים טבעיים" oninput="document.getElementById('glbl-3').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 4 – URL</label><input type="url" id="gimg-inp-3" placeholder="https://..."/></div>
+      <div class="af"><label>תמונה 5 – כיתוב</label><input type="text" id="glbl-inp-4" value="מארז לאירוע" oninput="document.getElementById('glbl-4').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 5 – URL</label><input type="url" id="gimg-inp-4" placeholder="https://..."/></div>
+      <button class="btn-save" onclick="applyGallery()"><i class="fas fa-check"></i>עדכן גלריה</button>
+    </div>
+  </div>
+
+  <!-- ⑤ עריכת טקסטים -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-home me-2" style="color:var(--rose)"></i>טקסטים – ירו</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג הבאדג' (badge)</label><input type="text" id="t-badge" value="סדנאות ניידות לכל ישראל" oninput="syncText('t-badge','hero-badge-txt')"/></div>
       <div class="af"><label>כותרת שורה 1</label><input type="text" id="t-h1" value="גלו את הקסם" oninput="syncText('t-h1','ht1')"/></div>
       <div class="af"><label>כותרת שורה 2</label><input type="text" id="t-h2" value="סבונים בעבודת יד" oninput="syncText('t-h2','ht2')"/></div>
       <div class="af"><label>תיאור</label><textarea id="t-hsub" rows="3" oninput="syncText('t-hsub','hsub')">סדנאות סבונים ניידות שמגיעות ישר אליכם – לבית, למשרד, לאירועים ולחגיגות. חוויה יוצרת ובלתי נשכחת לכל הגילאים!</textarea></div>
       <div class="af"><label>כפתור ראשי</label><input type="text" id="t-btn1" value="לסדנאות שלנו" oninput="syncText('t-btn1','hbtn1')"/></div>
       <div class="af"><label>כפתור משני</label><input type="text" id="t-btn2" value="השאירו פרטים" oninput="syncText('t-btn2','hbtn2')"/></div>
+      <div class="af"><label>בועה קטנה – אמוג'י</label><div class="icon-field"><input type="text" id="t-float-emoji" value="🧼" oninput="syncText('t-float-emoji','hero-float-emoji')"/><button class="pick-emoji-btn" onclick="openEmojiPicker('t-float-emoji','hero-float-emoji')">😊</button></div></div>
+      <div class="af"><label>בועה קטנה – שורה 1</label><input type="text" id="t-float-title" value="100% טבעי" oninput="syncText('t-float-title','hero-float-title')"/></div>
+      <div class="af"><label>בועה קטנה – שורה 2</label><input type="text" id="t-float-sub" value="ללא חומרים מזיקים" oninput="syncText('t-float-sub','hero-float-sub')"/></div>
+      <div class="af"><label>סטטיסטיקה 1 – מספר</label><input type="text" id="t-hstat1n" value="500+" oninput="syncText('t-hstat1n','hstat1n')"/></div>
+      <div class="af"><label>סטטיסטיקה 1 – תווית</label><input type="text" id="t-hstat1l" value="לקוחות מרוצים" oninput="syncText('t-hstat1l','hstat1l')"/></div>
+      <div class="af"><label>סטטיסטיקה 2 – מספר</label><input type="text" id="t-hstat2n" value="5⭐" oninput="syncText('t-hstat2n','hstat2n')"/></div>
+      <div class="af"><label>סטטיסטיקה 2 – תווית</label><input type="text" id="t-hstat2l" value="דירוג ממוצע" oninput="syncText('t-hstat2l','hstat2l')"/></div>
+      <div class="af"><label>סטטיסטיקה 3 – מספר</label><input type="text" id="t-hstat3n" value="5 שנים" oninput="syncText('t-hstat3n','hstat3n')"/></div>
+      <div class="af"><label>סטטיסטיקה 3 – תווית</label><input type="text" id="t-hstat3l" value="ניסיון" oninput="syncText('t-hstat3l','hstat3l')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">אודות</div>
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-user me-2" style="color:var(--rose)"></i>טקסטים – אודות</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג קטן</label><input type="text" id="t-about-label" value="✦ מי אני" oninput="syncText('t-about-label','about-label')"/></div>
       <div class="af"><label>כותרת</label><input type="text" id="t-atit" value="שמי נינה, ואני יוצרת סבונים" oninput="syncText('t-atit','atit')"/></div>
       <div class="af"><label>פסקה ראשונה</label><textarea id="t-ap1" rows="3" oninput="syncText('t-ap1','ap1')">לפני חמש שנים התאהבתי בעולם יצירת הסבונים. מה שהתחיל כתחביב קטן הפך לתשוקה אמיתית ולעסק משגשג שמביא שמחה ויצירה לאנשים רבים.</textarea></div>
       <div class="af"><label>פסקה שניה</label><textarea id="t-ap2" rows="3" oninput="syncText('t-ap2','ap2')">אני מציעה סדנאות ניידות שמגיעות אליכם, בין אם זה לבית, למשרד, ליום הולדת, לגיבוש עובדים או לכל אירוע אחר.</textarea></div>
+      <div class="af"><label>תיבה 1 – מספר</label><input type="text" id="t-astat1n" value="500+" oninput="syncText('t-astat1n','astat1n')"/></div>
+      <div class="af"><label>תיבה 1 – תווית</label><input type="text" id="t-astat1l" value="לקוחות מרוצים" oninput="syncText('t-astat1l','astat1l')"/></div>
+      <div class="af"><label>תיבה 2 – מספר</label><input type="text" id="t-astat2n" value="5" oninput="syncText('t-astat2n','astat2n')"/></div>
+      <div class="af"><label>תיבה 2 – תווית</label><input type="text" id="t-astat2l" value="שנות ניסיון" oninput="syncText('t-astat2l','astat2l')"/></div>
+      <div class="af"><label>תיבה 3 – מספר</label><input type="text" id="t-astat3n" value="∞" oninput="syncText('t-astat3n','astat3n')"/></div>
+      <div class="af"><label>תיבה 3 – תווית</label><input type="text" id="t-astat3l" value="יצירתיות" oninput="syncText('t-astat3l','astat3l')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">סדנאות</div>
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-hands me-2" style="color:var(--rose)"></i>טקסטים – סדנאות</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג קטן</label><input type="text" id="t-ws-label" value="✦ הסדנאות שלנו" oninput="syncText('t-ws-label','ws-label')"/></div>
       <div class="af"><label>כותרת</label><input type="text" id="t-wstit" value="חוויה יוצרת לכל אירוע" oninput="syncText('t-wstit','wstit')"/></div>
       <div class="af"><label>תת-כותרת</label><textarea id="t-wssub" rows="2" oninput="syncText('t-wssub','wssub')">הסדנאות שלנו פתוחות לכל הגילאים ומאפשרות לכל משתתף ליצור סבונים מותאמים אישית</textarea></div>
+      <div class="af"><label>כפתור CTA</label><input type="text" id="t-ws-cta" value="קבעו סדנה עכשיו" oninput="syncText('t-ws-cta','ws-cta-txt')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">גלריה</div>
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-images me-2" style="color:var(--rose)"></i>טקסטים – גלריה</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג קטן</label><input type="text" id="t-gal-label" value="✦ תיק עבודות" oninput="syncText('t-gal-label','gal-label')"/></div>
       <div class="af"><label>כותרת</label><input type="text" id="t-gtit" value="מארזי מתנה וסבונים" oninput="syncText('t-gtit','gtit')"/></div>
       <div class="af"><label>תת-כותרת</label><textarea id="t-gsub" rows="2" oninput="syncText('t-gsub','gsub')">מלבד סדנאות, ניתן להזמין מארזי מתנה לכל אירוע – סבונים ריחניים וצבעוניים בהזמנה מראש</textarea></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">יצירת קשר</div>
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-star me-2" style="color:var(--rose)"></i>טקסטים – חוות דעת</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג קטן</label><input type="text" id="t-rev-label" value="✦ מה אומרים עלינו" oninput="syncText('t-rev-label','rev-label')"/></div>
+      <div class="af"><label>כותרת</label><input type="text" id="t-rev-title" value="חוות דעת מהלב" oninput="syncText('t-rev-title','rev-title')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
+
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-envelope me-2" style="color:var(--rose)"></i>טקסטים – יצירת קשר</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תג קטן</label><input type="text" id="t-con-label" value="✦ יצירת קשר" oninput="syncText('t-con-label','con-label')"/></div>
       <div class="af"><label>כותרת</label><input type="text" id="t-ctit" value="מוזמנים לפנות אלינו" oninput="syncText('t-ctit','ctit')"/></div>
       <div class="af"><label>תת-כותרת</label><input type="text" id="t-csub" value="השאירו פרטים ונחזור אליכם בהקדם" oninput="syncText('t-csub','csub')"/></div>
+      <div class="af"><label>כותרת כרטיס קשר</label><input type="text" id="t-card-title" value="פרטי התקשרות" oninput="syncText('t-card-title','con-card-title')"/></div>
+      <div class="af"><label>תווית שורה 1</label><input type="text" id="t-ci-lbl1" value="טלפון / וואטסאפ" oninput="syncText('t-ci-lbl1','ci-lbl1')"/></div>
+      <div class="af"><label>תווית שורה 2</label><input type="text" id="t-ci-lbl2" value="אימייל" oninput="syncText('t-ci-lbl2','ci-lbl2')"/></div>
+      <div class="af"><label>תווית שורה 3</label><input type="text" id="t-ci-lbl3" value="אזור פעילות" oninput="syncText('t-ci-lbl3','ci-lbl3')"/></div>
       <div class="af"><label>אזור פעילות</label><input type="text" id="t-area" value="צפון הארץ ומרכז" oninput="syncTextMulti('t-area',['area1','area2'])"/></div>
+      <div class="af"><label>כפתור וואטסאפ</label><input type="text" id="t-wa-btn" value="שלחי הודעה בוואטסאפ" oninput="syncText('t-wa-btn','wa-btn-txt')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
+    </div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 8px">פוטר</div>
-      <div class="af"><label>תיאור קצר</label><textarea id="t-fdesc" rows="3" oninput="syncText('t-fdesc','fdesc')">סדנאות סבונים ניידות לכל אירוע וגיל. מגיעים אליכם עם כל הציוד ומחזירים חיוכים וסבונים מהממים!</textarea></div>
-      <div class="af"><label>שורת זכויות</label><input type="text" id="t-copy" value="© 2024 סבונינה – כל הזכויות שמורות לנינה קרן" oninput="syncText('t-copy','fcopy')"/></div>
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-th me-2" style="color:var(--rose)"></i>אייקונים</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px">אמוג'י</div>
+      <div class="af"><label>בועת הירו</label><div class="icon-field"><input type="text" id="ic-float-emoji" value="🧼" readonly/><button class="pick-emoji-btn" onclick="openEmojiPicker('ic-float-emoji','hero-float-emoji')">בחרי</button></div></div>
 
-      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור כל הטקסטים</button>
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 10px">אייקוני כפתורים</div>
+      <div class="af"><label>כפתור ראשי (ירו)</label><div class="icon-field"><input type="text" id="ic-hbtn1" value="fas fa-soap" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-hbtn1','hbtn1-icon')">בחרי</button></div></div>
+      <div class="af"><label>כפתור משני (ירו)</label><div class="icon-field"><input type="text" id="ic-hbtn2" value="fas fa-envelope" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-hbtn2','hbtn2-icon')">בחרי</button></div></div>
+      <div class="af"><label>כפתור Badge (ירו)</label><div class="icon-field"><input type="text" id="ic-badge" value="fas fa-star" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-badge','hero-badge-icon')">בחרי</button></div></div>
+      <div class="af"><label>כפתור CTA (סדנאות)</label><div class="icon-field"><input type="text" id="ic-wscta" value="fas fa-calendar-alt" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-wscta','ws-cta-icon')">בחרי</button></div></div>
+
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.3px;margin:14px 0 10px">אייקוני יצירת קשר</div>
+      <div class="af"><label>שורה 1 (טלפון)</label><div class="icon-field"><input type="text" id="ic-ci1" value="fas fa-phone" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-ci1','ci-icon1')">בחרי</button></div></div>
+      <div class="af"><label>שורה 2 (אימייל)</label><div class="icon-field"><input type="text" id="ic-ci2" value="fas fa-envelope" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-ci2','ci-icon2')">בחרי</button></div></div>
+      <div class="af"><label>שורה 3 (מיקום)</label><div class="icon-field"><input type="text" id="ic-ci3" value="fas fa-map-marker-alt" readonly/><button class="pick-fa-btn" onclick="openFaPicker('ic-ci3','ci-icon3')">בחרי</button></div></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור אייקונים</button>
     </div>
   </div>
 
@@ -454,6 +618,22 @@
       <div class="af"><label>קישור אינסטגרם</label><input type="url" id="inp-insta" placeholder="https://instagram.com/..."/></div>
       <div class="af"><label>קישור וואטסאפ</label><input type="url" id="inp-wa" placeholder="https://wa.me/972..."/></div>
       <button class="btn-save" onclick="applyContact()"><i class="fas fa-check"></i>עדכן פרטים</button>
+    </div>
+  </div>
+
+  <!-- פוטר -->
+  <div class="ap-section">
+    <div class="ap-section-header" onclick="toggleSection(this)">
+      <span><i class="fas fa-align-right me-2" style="color:var(--rose)"></i>פוטר</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="ap-body">
+      <div class="af"><label>תיאור קצר</label><textarea id="t-fdesc" rows="3" oninput="syncText('t-fdesc','fdesc')">סדנאות סבונים ניידות לכל אירוע וגיל. מגיעים אליכם עם כל הציוד ומחזירים חיוכים וסבונים מהממים!</textarea></div>
+      <div class="af"><label>כותרת עמודה "ניווט מהיר"</label><input type="text" id="t-fn1" value="ניווט מהיר" oninput="syncText('t-fn1','footer-nav-title')"/></div>
+      <div class="af"><label>כותרת עמודה "הסדנאות שלנו"</label><input type="text" id="t-fn2" value="הסדנאות שלנו" oninput="syncText('t-fn2','footer-ws-title')"/></div>
+      <div class="af"><label>כותרת עמודה "צרו קשר"</label><input type="text" id="t-fn3" value="צרו קשר" oninput="syncText('t-fn3','footer-con-title')"/></div>
+      <div class="af"><label>שורת זכויות</label><input type="text" id="t-copy" value="© 2024 סבונינה – כל הזכויות שמורות לנינה קרן" oninput="syncText('t-copy','fcopy')"/></div>
+      <button class="btn-save" onclick="saveAll()"><i class="fas fa-save"></i>שמור</button>
     </div>
   </div>
 
@@ -529,7 +709,7 @@
   <div class="container position-relative" style="z-index:1">
     <div class="row align-items-center g-5">
       <div class="col-lg-6 order-lg-1 order-2">
-        <div class="hero-badge"><i class="fas fa-star me-1"></i>סדנאות ניידות לכל ישראל</div>
+        <div class="hero-badge"><i id="hero-badge-icon" class="fas fa-star me-1"></i><span id="hero-badge-txt">סדנאות ניידות לכל ישראל</span></div>
         <h1 class="hero-title">
           <span id="ht1" class="editable" contenteditable="false">גלו את הקסם</span><br>
           של <span id="ht2" class="editable" contenteditable="false" style="color:var(--rose)">סבונים בעבודת יד</span>
@@ -538,23 +718,23 @@
           סדנאות סבונים ניידות שמגיעות ישר אליכם – לבית, למשרד, לאירועים ולחגיגות. חוויה יוצרת ובלתי נשכחת לכל הגילאים!
         </p>
         <div class="hero-btns d-flex flex-wrap gap-3">
-          <a href="#workshops" class="btn-primary-custom"><i class="fas fa-soap me-2"></i><span id="hbtn1" class="editable" contenteditable="false">לסדנאות שלנו</span></a>
-          <a href="#contact"   class="btn-outline-custom"><i class="fas fa-envelope me-2"></i><span id="hbtn2" class="editable" contenteditable="false">השאירו פרטים</span></a>
+          <a href="#workshops" class="btn-primary-custom"><i id="hbtn1-icon" class="fas fa-soap me-2"></i><span id="hbtn1" class="editable" contenteditable="false">לסדנאות שלנו</span></a>
+          <a href="#contact"   class="btn-outline-custom"><i id="hbtn2-icon" class="fas fa-envelope me-2"></i><span id="hbtn2" class="editable" contenteditable="false">השאירו פרטים</span></a>
         </div>
         <div class="d-flex gap-4 mt-4" style="opacity:.8">
-          <div><strong style="color:var(--brown);font-size:1.2rem">500+</strong><br><small>לקוחות מרוצים</small></div>
+          <div><strong id="hstat1n" style="color:var(--brown);font-size:1.2rem">500+</strong><br><small id="hstat1l">לקוחות מרוצים</small></div>
           <div style="width:1px;background:var(--blush)"></div>
-          <div><strong style="color:var(--brown);font-size:1.2rem">5⭐</strong><br><small>דירוג ממוצע</small></div>
+          <div><strong id="hstat2n" style="color:var(--brown);font-size:1.2rem">5⭐</strong><br><small id="hstat2l">דירוג ממוצע</small></div>
           <div style="width:1px;background:var(--blush)"></div>
-          <div><strong style="color:var(--brown);font-size:1.2rem">5 שנים</strong><br><small>ניסיון</small></div>
+          <div><strong id="hstat3n" style="color:var(--brown);font-size:1.2rem">5 שנים</strong><br><small id="hstat3l">ניסיון</small></div>
         </div>
       </div>
       <div class="col-lg-6 order-lg-2 order-1">
         <div class="hero-image-wrap text-center" style="position:relative">
           <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600&q=80" alt="סדנת סבונים" class="hero-img" id="heroImg"/>
           <div class="hero-float-badge">
-            <span style="font-size:22px">🧼</span>
-            <div><div style="font-size:13px;font-weight:700;color:var(--brown)">100% טבעי</div><div style="font-size:11px;color:#9a7060">ללא חומרים מזיקים</div></div>
+            <span id="hero-float-emoji" style="font-size:22px">🧼</span>
+            <div><div id="hero-float-title" style="font-size:13px;font-weight:700;color:var(--brown)">100% טבעי</div><div id="hero-float-sub" style="font-size:11px;color:#9a7060">ללא חומרים מזיקים</div></div>
           </div>
         </div>
       </div>
@@ -570,15 +750,15 @@
         <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" alt="נינה" class="about-img" id="aboutImg"/>
       </div>
       <div class="col-lg-7">
-        <div class="section-label">✦ מי אני</div>
+        <div class="section-label" id="about-label">✦ מי אני</div>
         <h2 class="section-title editable" contenteditable="false" id="atit">שמי נינה, ואני יוצרת סבונים</h2>
         <div class="section-divider rtl"></div>
         <p class="about-text editable" contenteditable="false" id="ap1">לפני חמש שנים התאהבתי בעולם יצירת הסבונים. מה שהתחיל כתחביב קטן הפך לתשוקה אמיתית ולעסק משגשג שמביא שמחה ויצירה לאנשים רבים.</p>
         <p class="about-text mt-3 editable" contenteditable="false" id="ap2">אני מציעה סדנאות ניידות שמגיעות אליכם, בין אם זה לבית, למשרד, ליום הולדת, לגיבוש עובדים או לכל אירוע אחר.</p>
         <div class="row g-3 mt-2">
-          <div class="col-4"><div class="about-stat"><span class="num">500+</span><span class="lbl">לקוחות מרוצים</span></div></div>
-          <div class="col-4"><div class="about-stat"><span class="num">5</span><span class="lbl">שנות ניסיון</span></div></div>
-          <div class="col-4"><div class="about-stat"><span class="num">∞</span><span class="lbl">יצירתיות</span></div></div>
+          <div class="col-4"><div class="about-stat"><span class="num" id="astat1n">500+</span><span class="lbl" id="astat1l">לקוחות מרוצים</span></div></div>
+          <div class="col-4"><div class="about-stat"><span class="num" id="astat2n">5</span><span class="lbl" id="astat2l">שנות ניסיון</span></div></div>
+          <div class="col-4"><div class="about-stat"><span class="num" id="astat3n">∞</span><span class="lbl" id="astat3l">יצירתיות</span></div></div>
         </div>
       </div>
     </div>
@@ -589,7 +769,7 @@
 <section class="workshops-section" id="workshops">
   <div class="container position-relative" style="z-index:1">
     <div class="text-center mb-5">
-      <div class="section-label" style="color:var(--blush)">✦ הסדנאות שלנו</div>
+      <div class="section-label" id="ws-label" style="color:var(--blush)">✦ הסדנאות שלנו</div>
       <h2 class="section-title" style="color:#fff" id="wstit">חוויה יוצרת לכל אירוע</h2>
       <div class="section-divider"></div>
       <p style="color:rgba(255,255,255,.75);max-width:500px;margin:0 auto" id="wssub">הסדנאות שלנו פתוחות לכל הגילאים ומאפשרות לכל משתתף ליצור סבונים מותאמים אישית</p>
@@ -599,7 +779,7 @@
       <button class="add-card-btn" onclick="focusAddWs()"><i class="fas fa-plus-circle" style="font-size:2rem"></i><span>הוסף סדנה חדשה</span></button>
     </div>
     <div class="text-center mt-5">
-      <a href="#contact" class="btn-primary-custom"><i class="fas fa-calendar-alt me-2"></i>קבעו סדנה עכשיו</a>
+      <a href="#contact" class="btn-primary-custom"><i id="ws-cta-icon" class="fas fa-calendar-alt me-2"></i><span id="ws-cta-txt">קבעו סדנה עכשיו</span></a>
     </div>
   </div>
 </section>
@@ -608,17 +788,17 @@
 <section class="gallery-section" id="gallery">
   <div class="container">
     <div class="text-center mb-5">
-      <div class="section-label">✦ תיק עבודות</div>
+      <div class="section-label" id="gal-label">✦ תיק עבודות</div>
       <h2 class="section-title editable" contenteditable="false" id="gtit">מארזי מתנה וסבונים</h2>
       <div class="section-divider"></div>
       <p style="color:#7a5545;max-width:480px;margin:0 auto" class="editable" contenteditable="false" id="gsub">מלבד סדנאות, ניתן להזמין מארזי מתנה לכל אירוע – סבונים ריחניים וצבעוניים בהזמנה מראש</p>
     </div>
     <div class="gallery-grid">
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סבוני מתנה</span></div></div>
-      <div class="gallery-item" style="grid-row:span 2"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" alt="" style="height:100%"/><div class="gallery-overlay"><span>מארז מיוחד</span></div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סדנת ילדים</span></div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80" alt=""/><div class="gallery-overlay"><span>סבונים טבעיים</span></div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80" alt=""/><div class="gallery-overlay"><span>מארז לאירוע</span></div></div>
+      <div class="gallery-item"><img id="gimg-0" src="https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-0">סבוני מתנה</span></div></div>
+      <div class="gallery-item" style="grid-row:span 2"><img id="gimg-1" src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" alt="" style="height:100%"/><div class="gallery-overlay"><span id="glbl-1">מארז מיוחד</span></div></div>
+      <div class="gallery-item"><img id="gimg-2" src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-2">סדנת ילדים</span></div></div>
+      <div class="gallery-item"><img id="gimg-3" src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-3">סבונים טבעיים</span></div></div>
+      <div class="gallery-item"><img id="gimg-4" src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-4">מארז לאירוע</span></div></div>
     </div>
   </div>
 </section>
@@ -627,8 +807,8 @@
 <section class="testimonials-section" id="reviews">
   <div class="container">
     <div class="text-center mb-5">
-      <div class="section-label">✦ מה אומרים עלינו</div>
-      <h2 class="section-title">חוות דעת מהלב</h2>
+      <div class="section-label" id="rev-label">✦ מה אומרים עלינו</div>
+      <h2 class="section-title" id="rev-title">חוות דעת מהלב</h2>
       <div class="section-divider"></div>
     </div>
     <div class="row g-4" id="testimonialsContainer"></div>
@@ -639,7 +819,7 @@
 <section class="contact-section" id="contact">
   <div class="container">
     <div class="text-center mb-5">
-      <div class="section-label">✦ יצירת קשר</div>
+      <div class="section-label" id="con-label">✦ יצירת קשר</div>
       <h2 class="section-title editable" contenteditable="false" id="ctit">מוזמנים לפנות אלינו</h2>
       <div class="section-divider"></div>
       <p style="color:#7a5545" class="editable" contenteditable="false" id="csub">השאירו פרטים ונחזור אליכם בהקדם</p>
@@ -664,14 +844,14 @@
       <div class="col-lg-4">
         <div class="contact-card h-100 d-flex flex-column justify-content-between">
           <div>
-            <h4 style="color:var(--brown);margin-bottom:20px">פרטי התקשרות</h4>
-            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-phone"></i></div><div class="ci-text"><div class="ci-label">טלפון / וואטסאפ</div><a href="#" id="phoneDisplay">054-4544483</a></div></div>
-            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-envelope"></i></div><div class="ci-text"><div class="ci-label">אימייל</div><a href="#" id="emailDisplay"><span class="__cf_email__" data-cfemail="244a4d4a454f4156414a111613644349454d480a474b49">[email&#160;protected]</span></a></div></div>
-            <div class="contact-info-item"><div class="ci-icon"><i class="fas fa-map-marker-alt"></i></div><div class="ci-text"><div class="ci-label">אזור פעילות</div><span id="area1">צפון הארץ ומרכז</span></div></div>
+            <h4 id="con-card-title" style="color:var(--brown);margin-bottom:20px">פרטי התקשרות</h4>
+            <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon1" class="fas fa-phone"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl1">טלפון / וואטסאפ</div><a href="#" id="phoneDisplay">054-4544483</a></div></div>
+            <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon2" class="fas fa-envelope"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl2">אימייל</div><a href="#" id="emailDisplay">ninakeren527@gmail.com</a></div></div>
+            <div class="contact-info-item"><div class="ci-icon"><i id="ci-icon3" class="fas fa-map-marker-alt"></i></div><div class="ci-text"><div class="ci-label" id="ci-lbl3">אזור פעילות</div><span id="area1">צפון הארץ ומרכז</span></div></div>
           </div>
           <div class="mt-4">
             <a href="https://wa.me/972544544483" target="_blank" class="btn-primary-custom d-block text-center" id="waBtnContact" style="background:#25d366;border-radius:12px;padding:14px;font-size:15px">
-              <i class="fab fa-whatsapp me-2"></i>שלחי הודעה בוואטסאפ
+              <i class="fab fa-whatsapp me-2"></i><span id="wa-btn-txt">שלחי הודעה בוואטסאפ</span>
             </a>
           </div>
         </div>
@@ -694,15 +874,15 @@
         </div>
       </div>
       <div class="col-lg-2 col-6">
-        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">ניווט מהיר</div>
+        <div id="footer-nav-title" style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">ניווט מהיר</div>
         <a href="#home" class="footer-link">ראשי</a><a href="#about" class="footer-link">מי אני</a><a href="#workshops" class="footer-link">הסדנאות</a><a href="#gallery" class="footer-link">תיק עבודות</a><a href="#reviews" class="footer-link">חוות דעת</a><a href="#contact" class="footer-link">יצירת קשר</a>
       </div>
       <div class="col-lg-3 col-6">
-        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">הסדנאות שלנו</div>
+        <div id="footer-ws-title" style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">הסדנאות שלנו</div>
         <a href="#workshops" class="footer-link">סדנת יום הולדת</a><a href="#workshops" class="footer-link">גיבוש עובדים</a><a href="#workshops" class="footer-link">בת מצווה / חינה</a><a href="#workshops" class="footer-link">סדנה לילדים</a><a href="#workshops" class="footer-link">מארזי מתנה</a>
       </div>
       <div class="col-lg-3">
-        <div style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">צרו קשר</div>
+        <div id="footer-con-title" style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">צרו קשר</div>
         <p style="font-size:14px;opacity:.7;line-height:2">
           <i class="fas fa-phone me-2" style="color:var(--rose)"></i><span id="footerPhone">054-4544483</span><br>
           <i class="fas fa-envelope me-2" style="color:var(--rose)"></i><span id="footerEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a7c9cec9c6ccc2d5c2c9929590e7c0cac6cecb89c4c8ca">[email&#160;protected]</a></span><br>
@@ -1048,6 +1228,9 @@ function focusAddWs() {
 function saveAll() {
   localStorage.setItem('sab-ws', JSON.stringify(workshops));
   localStorage.setItem('sab-rv', JSON.stringify(testimonials));
+  // icons
+  const IC = ['ic-hbtn1','ic-hbtn2','ic-badge','ic-wscta','ic-ci1','ic-ci2','ic-ci3','ic-float-emoji'];
+  IC.forEach(id => { const el = document.getElementById(id); if (el) localStorage.setItem('sab-' + id, el.value); });
   // texts
   const TM = {
     't-h1':'ht1','t-h2':'ht2','t-hsub':'hsub','t-btn1':'hbtn1','t-btn2':'hbtn2',
@@ -1121,11 +1304,20 @@ function loadSaved() {
   // texts
   const TM = {
     't-h1':'ht1','t-h2':'ht2','t-hsub':'hsub','t-btn1':'hbtn1','t-btn2':'hbtn2',
-    't-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
-    't-wstit':'wstit','t-wssub':'wssub',
-    't-gtit':'gtit','t-gsub':'gsub',
-    't-ctit':'ctit','t-csub':'csub',
-    't-fdesc':'fdesc','t-copy':'fcopy'
+    't-badge':'hero-badge-txt','t-float-title':'hero-float-title','t-float-sub':'hero-float-sub',
+    't-float-emoji':'hero-float-emoji',
+    't-hstat1n':'hstat1n','t-hstat1l':'hstat1l','t-hstat2n':'hstat2n','t-hstat2l':'hstat2l',
+    't-hstat3n':'hstat3n','t-hstat3l':'hstat3l',
+    't-about-label':'about-label','t-atit':'atit','t-ap1':'ap1','t-ap2':'ap2',
+    't-astat1n':'astat1n','t-astat1l':'astat1l','t-astat2n':'astat2n','t-astat2l':'astat2l',
+    't-astat3n':'astat3n','t-astat3l':'astat3l',
+    't-ws-label':'ws-label','t-wstit':'wstit','t-wssub':'wssub','t-ws-cta':'ws-cta-txt',
+    't-gal-label':'gal-label','t-gtit':'gtit','t-gsub':'gsub',
+    't-rev-label':'rev-label','t-rev-title':'rev-title',
+    't-con-label':'con-label','t-ctit':'ctit','t-csub':'csub',
+    't-card-title':'con-card-title','t-ci-lbl1':'ci-lbl1','t-ci-lbl2':'ci-lbl2','t-ci-lbl3':'ci-lbl3',
+    't-wa-btn':'wa-btn-txt',
+    't-fdesc':'fdesc','t-fn1':'footer-nav-title','t-fn2':'footer-ws-title','t-fn3':'footer-con-title','t-copy':'fcopy'
   };
   Object.entries(TM).forEach(([inp, tgt]) => {
     const saved = localStorage.getItem('sab-txt-' + tgt);
@@ -1137,6 +1329,31 @@ function loadSaved() {
   });
   const sa = localStorage.getItem('sab-txt-area');
   if (sa) { const ie = document.getElementById('t-area'); if (ie) ie.value = sa; ['area1','area2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=sa; }); }
+
+  // icons
+  const IC_MAP = {
+    'ic-hbtn1': 'hbtn1-icon', 'ic-hbtn2': 'hbtn2-icon', 'ic-badge': 'hero-badge-icon',
+    'ic-wscta': 'ws-cta-icon', 'ic-ci1': 'ci-icon1', 'ic-ci2': 'ci-icon2', 'ic-ci3': 'ci-icon3'
+  };
+  Object.entries(IC_MAP).forEach(([inputId, targetId]) => {
+    const saved = localStorage.getItem('sab-' + inputId);
+    if (saved) {
+      const inp = document.getElementById(inputId);
+      const tgt = document.getElementById(targetId);
+      if (inp) inp.value = saved;
+      if (tgt) tgt.className = saved;
+    }
+  });
+
+  // gallery
+  const sg = localStorage.getItem('sab-gallery');
+  if (sg) {
+    const gdata = JSON.parse(sg);
+    gdata.forEach((g, i) => {
+      if (g.url) { document.getElementById('gimg-' + i).src = g.url; document.getElementById('gimg-inp-' + i).value = g.url; }
+      if (g.lbl) { document.getElementById('glbl-' + i).textContent = g.lbl; document.getElementById('glbl-inp-' + i).value = g.lbl; }
+    });
+  }
 }
 
 /* ═══════════════════════════════════════
@@ -1146,6 +1363,181 @@ function showToast(msg = '✓ נשמר!') {
   const t = document.getElementById('toastSave');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════
+   ICON & EMOJI PICKER
+═══════════════════════════════════════ */
+const EMOJI_CATS = [
+  { cat:'סבונים וטיפוח', items:['🧼','🛁','🚿','💧','🌿','🌸','🌺','🌻','🌹','💐','🍃','🍀','🌱','🌾','🫧','✨','💎','🎀','🎁','💝','💖','💕','🤍','🌙','⭐','🌟','💫'] },
+  { cat:'חגיגות ואירועים', items:['🎉','🎊','🎈','🎂','🥳','🎁','🎀','🎗','🎆','🎇','✨','🌟','💫','🎠','🎡','🎪','🎭','🎬','🎤','🎶','🎵','🎸','🥂','🍾','🍰','🧁','🍭'] },
+  { cat:'אנשים ורגשות', items:['😊','😍','🥰','😘','🤗','😎','🥳','😇','🌷','💃','🕺','👩','👨','👧','👦','🧒','👶','💁','🙋','👏','🤝','💪','🖐','✌','🤟','❤','💚','💛','💜','🖤','🤎'] },
+  { cat:'טבע', items:['🌿','🍀','🌱','🌾','🌵','🌴','🌳','🌲','🍁','🍂','🍃','🌸','🌺','🌻','🌹','🌼','💐','🌷','🌞','🌙','⭐','🌈','🌊','🌋','🏔','⛰','🌅','🌄'] },
+  { cat:'מזון', items:['🍯','🫚','🌿','🍋','🍊','🍓','🫐','🍇','🍑','🥭','🍍','🥥','🫖','🍵','🧃','🥤','🧁','🍰','🍮','🍭','🍬','🍫','🧇','🥞'] },
+];
+
+const FA_ICONS = {
+  'כללי': [
+    ['fas fa-star','fa-star'],['fas fa-heart','fa-heart'],['fas fa-home','fa-home'],
+    ['fas fa-check','fa-check'],['fas fa-times','fa-times'],['fas fa-plus','fa-plus'],
+    ['fas fa-minus','fa-minus'],['fas fa-search','fa-search'],['fas fa-cog','fa-cog'],
+    ['fas fa-user','fa-user'],['fas fa-users','fa-users'],['fas fa-bell','fa-bell'],
+    ['fas fa-bookmark','fa-bookmark'],['fas fa-flag','fa-flag'],['fas fa-tag','fa-tag'],
+    ['fas fa-tags','fa-tags'],['fas fa-shield-alt','fa-shield-alt'],['fas fa-lock','fa-lock'],
+    ['fas fa-unlock','fa-unlock'],['fas fa-eye','fa-eye'],['fas fa-map-marker-alt','fa-map-marker-alt'],
+    ['fas fa-globe','fa-globe'],['fas fa-info-circle','fa-info-circle'],['fas fa-question-circle','fa-question-circle'],
+  ],
+  'תקשורת': [
+    ['fas fa-phone','fa-phone'],['fas fa-mobile-alt','fa-mobile-alt'],['fas fa-envelope','fa-envelope'],
+    ['fas fa-paper-plane','fa-paper-plane'],['fas fa-comment','fa-comment'],['fas fa-comments','fa-comments'],
+    ['fas fa-share','fa-share'],['fas fa-share-alt','fa-share-alt'],['fas fa-at','fa-at'],
+    ['fab fa-whatsapp','fab fa-whatsapp'],['fab fa-instagram','fab fa-instagram'],
+    ['fab fa-facebook','fab fa-facebook'],['fab fa-tiktok','fab fa-tiktok'],
+    ['fab fa-youtube','fab fa-youtube'],['fab fa-linkedin','fab fa-linkedin'],
+  ],
+  'עסקים': [
+    ['fas fa-briefcase','fa-briefcase'],['fas fa-chart-bar','fa-chart-bar'],['fas fa-chart-line','fa-chart-line'],
+    ['fas fa-dollar-sign','fa-dollar-sign'],['fas fa-shekel-sign','fa-shekel-sign'],
+    ['fas fa-shopping-cart','fa-shopping-cart'],['fas fa-shopping-bag','fa-shopping-bag'],
+    ['fas fa-store','fa-store'],['fas fa-building','fa-building'],['fas fa-handshake','fa-handshake'],
+    ['fas fa-award','fa-award'],['fas fa-certificate','fa-certificate'],['fas fa-medal','fa-medal'],
+    ['fas fa-trophy','fa-trophy'],['fas fa-gift','fa-gift'],['fas fa-box','fa-box'],
+  ],
+  'יצירה וסדנאות': [
+    ['fas fa-paint-brush','fa-paint-brush'],['fas fa-palette','fa-palette'],['fas fa-pencil-alt','fa-pencil-alt'],
+    ['fas fa-pen','fa-pen'],['fas fa-cut','fa-cut'],['fas fa-scissors','fa-scissors'],
+    ['fas fa-soap','fa-soap'],['fas fa-spa','fa-spa'],['fas fa-leaf','fa-leaf'],
+    ['fas fa-seedling','fa-seedling'],['fas fa-flask','fa-flask'],['fas fa-magic','fa-magic'],
+    ['fas fa-wand-magic-sparkles','fa-wand-magic-sparkles'],['fas fa-hands','fa-hands'],
+    ['fas fa-hand-holding-heart','fa-hand-holding-heart'],['fas fa-hands-helping','fa-hands-helping'],
+  ],
+  'אירועים': [
+    ['fas fa-birthday-cake','fa-birthday-cake'],['fas fa-glass-cheers','fa-glass-cheers'],
+    ['fas fa-calendar-alt','fa-calendar-alt'],['fas fa-calendar-check','fa-calendar-check'],
+    ['fas fa-calendar','fa-calendar'],['fas fa-clock','fa-clock'],
+    ['fas fa-music','fa-music'],['fas fa-headphones','fa-headphones'],
+    ['fas fa-camera','fa-camera'],['fas fa-images','fa-images'],['fas fa-image','fa-image'],
+    ['fas fa-video','fa-video'],['fas fa-film','fa-film'],['fas fa-theater-masks','fa-theater-masks'],
+  ],
+  'טבע ובריאות': [
+    ['fas fa-sun','fa-sun'],['fas fa-moon','fa-moon'],['fas fa-cloud','fa-cloud'],
+    ['fas fa-snowflake','fa-snowflake'],['fas fa-fire','fa-fire'],['fas fa-water','fa-water'],
+    ['fas fa-wind','fa-wind'],['fas fa-mountain','fa-mountain'],['fas fa-tree','fa-tree'],
+    ['fas fa-heartbeat','fa-heartbeat'],['fas fa-smile','fa-smile'],['fas fa-smile-beam','fa-smile-beam'],
+    ['fas fa-laugh','fa-laugh'],['fas fa-hand-peace','fa-hand-peace'],['fas fa-yin-yang','fa-yin-yang'],
+    ['fas fa-infinity','fa-infinity'],
+  ],
+};
+
+let _pickerInputId = '';
+let _pickerTargetId = '';
+let _pickerMode = ''; // 'emoji' | 'fa'
+
+function openEmojiPicker(inputId, targetId) {
+  _pickerInputId = inputId; _pickerTargetId = targetId; _pickerMode = 'emoji';
+  document.getElementById('pickerTitle').textContent = 'בחרי אמוג\'י';
+  document.getElementById('pickerSearch').value = '';
+  renderEmojiGrid('');
+  document.getElementById('pickerModal').classList.add('show');
+  document.getElementById('pickerSearch').focus();
+}
+
+function openFaPicker(inputId, targetId) {
+  _pickerInputId = inputId; _pickerTargetId = targetId; _pickerMode = 'fa';
+  document.getElementById('pickerTitle').textContent = 'בחרי אייקון';
+  document.getElementById('pickerSearch').value = '';
+  renderFaGrid('');
+  document.getElementById('pickerModal').classList.add('show');
+  document.getElementById('pickerSearch').focus();
+}
+
+function closePicker() {
+  document.getElementById('pickerModal').classList.remove('show');
+}
+
+function filterPicker() {
+  const q = document.getElementById('pickerSearch').value.toLowerCase();
+  if (_pickerMode === 'emoji') renderEmojiGrid(q);
+  else renderFaGrid(q);
+}
+
+function renderEmojiGrid(q) {
+  const c = document.getElementById('pickerContent');
+  c.innerHTML = '';
+  EMOJI_CATS.forEach(cat => {
+    const filtered = q ? cat.items.filter(e => e.includes(q)) : cat.items;
+    if (!filtered.length) return;
+    const title = document.createElement('div');
+    title.className = 'picker-cat-title'; title.textContent = cat.cat;
+    c.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'emoji-grid';
+    filtered.forEach(em => {
+      const btn = document.createElement('button');
+      btn.className = 'emoji-btn'; btn.textContent = em;
+      btn.onclick = () => {
+        const inp = document.getElementById(_pickerInputId);
+        const tgt = document.getElementById(_pickerTargetId);
+        if (inp) inp.value = em;
+        if (tgt) tgt.textContent = em;
+        closePicker();
+        showToast('אמוג\'י עודכן!');
+      };
+      grid.appendChild(btn);
+    });
+    c.appendChild(grid);
+  });
+}
+
+function renderFaGrid(q) {
+  const c = document.getElementById('pickerContent');
+  c.innerHTML = '';
+  Object.entries(FA_ICONS).forEach(([cat, icons]) => {
+    const filtered = q ? icons.filter(([cls]) => cls.includes(q)) : icons;
+    if (!filtered.length) return;
+    const title = document.createElement('div');
+    title.className = 'picker-cat-title'; title.textContent = cat;
+    c.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'fa-grid';
+    filtered.forEach(([cls]) => {
+      const btn = document.createElement('button');
+      btn.className = 'fa-opt'; btn.title = cls;
+      btn.innerHTML = `<i class="${cls}"></i>`;
+      btn.onclick = () => {
+        const inp = document.getElementById(_pickerInputId);
+        const tgt = document.getElementById(_pickerTargetId);
+        if (inp) inp.value = cls;
+        if (tgt) { tgt.className = cls; }
+        closePicker();
+        showToast('אייקון עודכן!');
+      };
+      grid.appendChild(btn);
+    });
+    c.appendChild(grid);
+  });
+}
+
+/* ═══════════════════════════════════════
+   GALLERY IMAGES
+═══════════════════════════════════════ */
+function applyGallery() {
+  for (let i = 0; i < 5; i++) {
+    const url = document.getElementById('gimg-inp-' + i).value.trim();
+    const lbl = document.getElementById('glbl-inp-' + i).value.trim();
+    if (url) document.getElementById('gimg-' + i).src = url;
+    if (lbl) document.getElementById('glbl-' + i).textContent = lbl;
+  }
+  // save
+  const data = [];
+  for (let i = 0; i < 5; i++) {
+    data.push({
+      url: document.getElementById('gimg-' + i).src,
+      lbl: document.getElementById('glbl-' + i).textContent
+    });
+  }
+  localStorage.setItem('sab-gallery', JSON.stringify(data));
+  showToast('תמונות הגלריה עודכנו!');
 }
 
 /* ═══════════════════════════════════════
