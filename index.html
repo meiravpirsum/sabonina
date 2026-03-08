@@ -1112,7 +1112,7 @@
       </div>
       <div class="col-lg-3 col-6">
         <div id="footer-ws-title" style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">הסדנאות שלנו</div>
-        <a href="#workshops" class="footer-link">סדנת יום הולדת</a><a href="#workshops" class="footer-link">גיבוש עובדים</a><a href="#workshops" class="footer-link">בת מצווה / חינה</a><a href="#workshops" class="footer-link">סדנה לילדים</a><a href="#workshops" class="footer-link">מארזי מתנה</a>
+        <div id="footerWsList"></div>
       </div>
       <div class="col-lg-3">
         <div id="footer-con-title" style="font-family:'Heebo',sans-serif;font-weight:700;color:var(--blush);font-size:15px;margin-bottom:14px">צרו קשר</div>
@@ -1211,6 +1211,14 @@ function renderWorkshops() {
   ac.style.display = adminMode ? 'block' : 'none';
 }
 
+function renderFooterWs() {
+  const el = document.getElementById('footerWsList');
+  if (!el) return;
+  el.innerHTML = workshops.map(ws =>
+    `<a href="#workshops" class="footer-link">${ws.icon} ${ws.title}</a>`
+  ).join('');
+}
+
 function renderTestimonials() {
   const c = document.getElementById('testimonialsContainer');
   c.innerHTML = '';
@@ -1264,7 +1272,7 @@ function toggleAdmin() {
   document.getElementById('adminIcon').className   = adminMode ? 'fas fa-times' : 'fas fa-cog';
   document.getElementById('adminLabel').textContent = adminMode ? 'סגור עריכה' : 'ניהול תוכן';
   document.querySelectorAll('.editable').forEach(el => el.contentEditable = adminMode);
-  renderWorkshops();
+  renderWorkshops(); renderFooterWs();
   renderTestimonials();
 }
 
@@ -1437,11 +1445,11 @@ function addWorkshop() {
     title, desc:  document.getElementById('new-ws-desc').value.trim(),
     price: document.getElementById('new-ws-price').value.trim(), tags: []
   });
-  renderWorkshops();
+  renderWorkshops(); renderFooterWs();
   ['new-ws-title','new-ws-desc','new-ws-price','new-ws-icon'].forEach(id => document.getElementById(id).value = '');
   showToast('סדנה נוספה!');
 }
-function delWs(i) { if (!confirm('למחוק?')) return; workshops.splice(i,1); renderWorkshops(); }
+function delWs(i) { if (!confirm('למחוק?')) return; workshops.splice(i,1); renderWorkshops(); renderFooterWs(); }
 
 function addTestimonial() {
   const name = document.getElementById('new-rev-name').value.trim();
@@ -1502,7 +1510,7 @@ function resetAll() {
   workshops    = JSON.parse(JSON.stringify(DW));
   testimonials = JSON.parse(JSON.stringify(DR));
   applyColors(THEMES[0]);
-  renderWorkshops(); renderTestimonials();
+  renderWorkshops(); renderFooterWs(); renderTestimonials();
   showToast('↩ אופס לברירת מחדל');
 }
 
@@ -1953,7 +1961,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.editable').forEach(el => el.contentEditable = 'false');
   buildThemeDots();
   buildFonts();
-  renderWorkshops();
+  renderWorkshops(); renderFooterWs();
   renderTestimonials();
   loadSaved();
   loadA11y();
