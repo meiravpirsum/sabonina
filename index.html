@@ -475,6 +475,8 @@
       <div class="af"><label>תמונה 4 – URL</label><input type="url" id="gimg-inp-3" placeholder="https://..."/></div>
       <div class="af"><label>תמונה 5 – כיתוב</label><input type="text" id="glbl-inp-4" value="מארז לאירוע" oninput="document.getElementById('glbl-4').textContent=this.value"/></div>
       <div class="af"><label>תמונה 5 – URL</label><input type="url" id="gimg-inp-4" placeholder="https://..."/></div>
+      <div class="af"><label>תמונה 6 – כיתוב</label><input type="text" id="glbl-inp-5" value="סבוני ארומתרפיה" oninput="document.getElementById('glbl-5').textContent=this.value"/></div>
+      <div class="af"><label>תמונה 6 – URL</label><input type="url" id="gimg-inp-5" placeholder="https://..."/></div>
       <button class="btn-save" onclick="applyGallery()"><i class="fas fa-check"></i>עדכן גלריה</button>
     </div>
   </div>
@@ -799,6 +801,7 @@
       <div class="gallery-item"><img id="gimg-2" src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-2">סדנת ילדים</span></div></div>
       <div class="gallery-item"><img id="gimg-3" src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-3">סבונים טבעיים</span></div></div>
       <div class="gallery-item"><img id="gimg-4" src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-4">מארז לאירוע</span></div></div>
+      <div class="gallery-item"><img id="gimg-5" src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80" alt=""/><div class="gallery-overlay"><span id="glbl-5">סבוני ארומתרפיה</span></div></div>
     </div>
   </div>
 </section>
@@ -1531,7 +1534,7 @@ function renderFaGrid(q) {
    GALLERY IMAGES
 ═══════════════════════════════════════ */
 function applyGallery() {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const url = document.getElementById('gimg-inp-' + i).value.trim();
     const lbl = document.getElementById('glbl-inp-' + i).value.trim();
     if (url) document.getElementById('gimg-' + i).src = url;
@@ -1539,7 +1542,7 @@ function applyGallery() {
   }
   // save
   const data = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     data.push({
       url: document.getElementById('gimg-' + i).src,
       lbl: document.getElementById('glbl-' + i).textContent
